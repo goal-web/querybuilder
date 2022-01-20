@@ -12,7 +12,7 @@ func TestSimpleQueryBuilder(t *testing.T) {
 	query := NewQuery("users")
 	query.Where("name", "qbhy").
 		Where("age", ">", 18).
-		Where("gender", "!=", 0, contracts.Or).
+		Where("gender", "!=", 0).
 		OrWhere("amount", ">=", 100).
 		WhereIsNull("avatar")
 	fmt.Println(query.ToSql())
@@ -76,7 +76,7 @@ func TestSelectSub(t *testing.T) {
 			return NewQuery("accounts").Where("accounts.id", "users.id").Count()
 		}, "accounts_count").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		WithPagination(100).
+		WithPagination(100, 1).
 		SelectSql()
 	fmt.Println(sql)
 	fmt.Println(bindings)

@@ -22,5 +22,7 @@ func (this *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []i
 		sql = fmt.Sprintf("%s where %s", sql, this.wheres.String())
 	}
 
+	bindings = append(bindings, this.bindings[whereBinding]...)
+
 	return
 }
