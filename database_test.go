@@ -76,6 +76,7 @@ func TestSelectSub(t *testing.T) {
 			return NewQuery("accounts").Where("accounts.id", "users.id").Count()
 		}, "accounts_count").
 		Join("accounts", "accounts.user_id", "=", "users.id").
+		WithPagination(100).
 		SelectSql()
 	fmt.Println(sql)
 	fmt.Println(bindings)

@@ -10,6 +10,8 @@ import (
 
 type bindingType string
 type Builder struct {
+	limit    int64
+	offset   int64
 	distinct bool
 	table    string
 	fields   []string
@@ -20,6 +22,14 @@ type Builder struct {
 	unions   Unions
 	having   *Wheres
 	bindings map[bindingType][]interface{}
+}
+
+func (this *Builder) Skip(offset int64) contracts.QueryBuilder {
+	return this.Offset(offset)
+}
+
+func (this *Builder) Take(num int64) contracts.QueryBuilder {
+	return this.Limit(num)
 }
 
 const (
@@ -137,6 +147,28 @@ func (this *Builder) From(table string, as ...string) contracts.QueryBuilder {
 	return this
 }
 
+func (this *Builder) Offset(offset int64) contracts.QueryBuilder {
+	this.offset = offset
+	return this
+}
+
+func (this *Builder) Limit(num int64) contracts.QueryBuilder {
+	this.limit = num
+	return this
+}
+
+func (this *Builder) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder {
+	this.limit = perPage
+	if len(current) > 0 {
+		this.offset = perPage * (current[0] - 1)
+	}
+	return this
+}
+
+func (this *Builder) SimplePaginate(perPage int64, current ...int64) interface{} {
+	return this.WithPagination(perPage, current...).Get()
+}
+
 func (this *Builder) FromMany(tables ...string) contracts.QueryBuilder {
 	if len(tables) > 0 {
 		this.table = strings.Join(tables, ",")
@@ -187,6 +219,10 @@ func (this *Builder) ToSql() string {
 
 	if !this.orderBy.IsEmpty() {
 		sql = fmt.Sprintf("%s order by %s", sql, this.orderBy.String())
+	}
+
+	if this.limit > 0 {
+		sql = fmt.Sprintf("%s limit %d offset %d", sql, this.limit, this.offset)
 	}
 
 	if !this.unions.IsEmpty() {

@@ -5,6 +5,12 @@ github.com/goal-web/contracts v0.0.0-20220120063121-9969779f8ff5 h1:hVeMh27KiHK0
 github.com/goal-web/contracts v0.0.0-20220120063121-9969779f8ff5/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
 github.com/goal-web/contracts v0.0.0-20220120064722-730db09bcdd1 h1:9wu//8a8iAkM1DMUz/pce9hLAIbL8IujUaIrsizDkno=
 github.com/goal-web/contracts v0.0.0-20220120064722-730db09bcdd1/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
+github.com/goal-web/contracts v0.0.0-20220120073727-bdaef5977d2f h1:C0MACACK0TNPN9ukuwH5m7Sy0yqeP4QbAo0GAvKGUtM=
+github.com/goal-web/contracts v0.0.0-20220120073727-bdaef5977d2f/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
+github.com/goal-web/contracts v0.0.0-20220120082934-6bccbf6c637e h1:2qn5vV+yY7kYqcyWdS23ymXUDMoKCj1Gh6U/2kiYFyg=
+github.com/goal-web/contracts v0.0.0-20220120082934-6bccbf6c637e/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
+github.com/goal-web/contracts v0.0.0-20220120093117-be8f72613bff h1:icWPUCgywE8+1zYemJ3t5mVHQBDVVprhVdhaULkrx9E=
+github.com/goal-web/contracts v0.0.0-20220120093117-be8f72613bff/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
 github.com/goal-web/supports v0.0.0-20220120022343-2b715d6e81fc h1:VsT1h9claNluQ2y0K2Qf8Q7dZeX040mZVgBjbOjwno8=
 github.com/goal-web/supports v0.0.0-20220120022343-2b715d6e81fc/go.mod h1:F4to2eJ5J8Wasj+iC2Ks20YQChPuY5A6XyvKkvcxPYA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
