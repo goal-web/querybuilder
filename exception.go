@@ -1,4 +1,4 @@
-package builder
+package querybuilder
 
 import (
 	"github.com/goal-web/contracts"

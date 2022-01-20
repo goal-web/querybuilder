@@ -1,4 +1,4 @@
-package builder
+package querybuilder
 
 func (this *Builder) WhereBetween(field string, args interface{}, whereType ...whereJoinType) *Builder {
 	if len(whereType) > 0 {

@@ -1,4 +1,4 @@
-package builder
+package querybuilder
 
 import (
 	"fmt"
@@ -229,7 +229,7 @@ func TestGroupByQueryBuilder(t *testing.T) {
 			return NewQuery("users").Where("amount", ">", 1000)
 		}, "rich_users").
 			GroupBy("country").
-			Having("count(rich_users.id)", "<", 1000).   // 人口少
+			Having("count(rich_users.id)", "<", 1000). // 人口少
 			OrHaving("sum(rich_users.amount)", "<", 100) // 或者穷
 
 	fmt.Println(query.ToSql())

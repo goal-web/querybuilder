@@ -1,4 +1,4 @@
-package builder
+package querybuilder
 
 func (this *Builder) WhereIn(field string, args interface{}) *Builder {
 	return this.Where(field, "in", args)

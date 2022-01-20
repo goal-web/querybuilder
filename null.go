@@ -1,4 +1,4 @@
-package builder
+package querybuilder
 
 func (this *Builder) WhereIsNull(field string, whereType ...string) *Builder {
 	if len(whereType) == 0 {
