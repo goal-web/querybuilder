@@ -2,13 +2,7 @@ package querybuilder
 
 import (
 	"fmt"
-)
-
-type whereJoinType string
-
-const (
-	And whereJoinType = "AND"
-	Or  whereJoinType = "OR"
+	"github.com/goal-web/contracts"
 )
 
 type Where struct {
@@ -25,15 +19,15 @@ func (this *Where) String() string {
 }
 
 type Wheres struct {
-	subWheres map[whereJoinType][]*Wheres
-	wheres    map[whereJoinType][]*Where
+	subWheres map[contracts.WhereJoinType][]*Wheres
+	wheres    map[contracts.WhereJoinType][]*Where
 }
 
 func (this *Wheres) IsEmpty() bool {
 	return len(this.subWheres) == 0 && len(this.wheres) == 0
 }
 
-func (this Wheres) getSubStringers(whereType whereJoinType) []fmt.Stringer {
+func (this Wheres) getSubStringers(whereType contracts.WhereJoinType) []fmt.Stringer {
 	stringers := make([]fmt.Stringer, 0)
 	for _, where := range this.subWheres[whereType] {
 		stringers = append(stringers, where)
@@ -41,7 +35,7 @@ func (this Wheres) getSubStringers(whereType whereJoinType) []fmt.Stringer {
 	return stringers
 }
 
-func (this Wheres) getStringers(whereType whereJoinType) []fmt.Stringer {
+func (this Wheres) getStringers(whereType contracts.WhereJoinType) []fmt.Stringer {
 	stringers := make([]fmt.Stringer, 0)
 	for _, where := range this.wheres[whereType] {
 		stringers = append(stringers, where)
@@ -49,11 +43,11 @@ func (this Wheres) getStringers(whereType whereJoinType) []fmt.Stringer {
 	return stringers
 }
 
-func (this *Wheres) getSubWheres(whereType whereJoinType) string {
+func (this *Wheres) getSubWheres(whereType contracts.WhereJoinType) string {
 	return JoinSubStringerArray(this.getSubStringers(whereType), string(whereType))
 }
 
-func (this *Wheres) getWheres(whereType whereJoinType) string {
+func (this *Wheres) getWheres(whereType contracts.WhereJoinType) string {
 	return JoinStringerArray(this.getStringers(whereType), string(whereType))
 }
 
@@ -62,61 +56,60 @@ func (this *Wheres) String() (result string) {
 		return ""
 	}
 
-	result = this.getSubWheres(And)
-	andWheres := this.getWheres(And)
+	result = this.getSubWheres(contracts.And)
+	andWheres := this.getWheres(contracts.And)
 
 	if result != "" {
 		if andWheres != "" {
-			result = fmt.Sprintf("%s AND %s", result, andWheres)
+			result = fmt.Sprintf("%s and %s", result, andWheres)
 		}
 	} else {
 		result = andWheres
 	}
 
-	orSubWheres := this.getSubWheres(Or)
+	orSubWheres := this.getSubWheres(contracts.Or)
 	if result == "" {
 		result = orSubWheres
 	} else if orSubWheres != "" {
-		result = fmt.Sprintf("%s OR %s", result, orSubWheres)
+		result = fmt.Sprintf("%s or %s", result, orSubWheres)
 	}
 
-	orWheres := this.getWheres(Or)
+	orWheres := this.getWheres(contracts.Or)
 	if result == "" {
 		result = orWheres
 	} else if orWheres != "" {
-		result = fmt.Sprintf("%s OR %s", result, orWheres)
+		result = fmt.Sprintf("%s or %s", result, orWheres)
 	}
 
 	return
 }
 
-func (this *Builder) WhereFunc(callback whereFunc, whereType ...whereJoinType) *Builder {
+func (this *Builder) WhereFunc(callback contracts.QueryFunc, whereType ...contracts.WhereJoinType) contracts.QueryBuilder {
 	subBuilder := &Builder{
 		wheres: &Wheres{
-			wheres:    map[whereJoinType][]*Where{},
-			subWheres: map[whereJoinType][]*Wheres{},
+			wheres:    map[contracts.WhereJoinType][]*Where{},
+			subWheres: map[contracts.WhereJoinType][]*Wheres{},
 		},
 		bindings: map[bindingType][]interface{}{},
 	}
 	callback(subBuilder)
 	if len(whereType) == 0 {
-		this.wheres.subWheres[And] = append(this.wheres.subWheres[And], subBuilder.getWheres())
+		this.wheres.subWheres[contracts.And] = append(this.wheres.subWheres[contracts.And], subBuilder.getWheres())
 	} else {
 		this.wheres.subWheres[whereType[0]] = append(this.wheres.subWheres[whereType[0]], subBuilder.getWheres())
 	}
-	this.addBinding(whereBinding, subBuilder.GetBindings()...)
-	return this
+	return this.addBinding(whereBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) OrWhereFunc(callback whereFunc) *Builder {
-	return this.WhereFunc(callback, Or)
+func (this *Builder) OrWhereFunc(callback contracts.QueryFunc) contracts.QueryBuilder {
+	return this.WhereFunc(callback, contracts.Or)
 }
 
-func (this *Builder) Where(field string, args ...interface{}) *Builder {
+func (this *Builder) Where(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
-		whereType = And
+		whereType = contracts.And
 	)
 	switch len(args) {
 	case 1:
@@ -127,7 +120,7 @@ func (this *Builder) Where(field string, args ...interface{}) *Builder {
 	case 3:
 		condition = args[0].(string)
 		arg = args[1]
-		whereType = args[2].(whereJoinType)
+		whereType = args[2].(contracts.WhereJoinType)
 	}
 
 	raw, bindings := this.prepareArgs(condition, arg)
@@ -141,7 +134,7 @@ func (this *Builder) Where(field string, args ...interface{}) *Builder {
 	return this.addBinding(whereBinding, bindings...)
 }
 
-func (this *Builder) OrWhere(field string, args ...interface{}) *Builder {
+func (this *Builder) OrWhere(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -158,7 +151,7 @@ func (this *Builder) OrWhere(field string, args ...interface{}) *Builder {
 	}
 	raw, bindings := this.prepareArgs(condition, arg)
 
-	this.wheres.wheres[Or] = append(this.wheres.wheres[Or], &Where{
+	this.wheres.wheres[contracts.Or] = append(this.wheres.wheres[contracts.Or], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,

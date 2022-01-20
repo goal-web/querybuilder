@@ -1,6 +1,7 @@
 package querybuilder
 
 import (
+	"github.com/goal-web/contracts"
 	"strings"
 )
 
@@ -18,17 +19,17 @@ func (this GroupBy) String() string {
 	return strings.Join(this, ",")
 }
 
-func (this *Builder) GroupBy(columns ...string) *Builder {
+func (this *Builder) GroupBy(columns ...string) contracts.QueryBuilder {
 	this.groupBy = append(this.groupBy, columns...)
 
 	return this
 }
 
-func (this *Builder) Having(field string, args ...interface{}) *Builder {
+func (this *Builder) Having(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
-		whereType = And
+		whereType = contracts.And
 	)
 	switch len(args) {
 	case 1:
@@ -39,7 +40,7 @@ func (this *Builder) Having(field string, args ...interface{}) *Builder {
 	case 3:
 		condition = args[0].(string)
 		arg = args[1]
-		whereType = args[2].(whereJoinType)
+		whereType = args[2].(contracts.WhereJoinType)
 	}
 
 	raw, bindings := this.prepareArgs(condition, arg)
@@ -53,7 +54,7 @@ func (this *Builder) Having(field string, args ...interface{}) *Builder {
 	return this.addBinding(havingBinding, bindings...)
 }
 
-func (this *Builder) OrHaving(field string, args ...interface{}) *Builder {
+func (this *Builder) OrHaving(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -70,7 +71,7 @@ func (this *Builder) OrHaving(field string, args ...interface{}) *Builder {
 	}
 	raw, bindings := this.prepareArgs(condition, arg)
 
-	this.having.wheres[Or] = append(this.having.wheres[Or], &Where{
+	this.having.wheres[contracts.Or] = append(this.having.wheres[contracts.Or], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,

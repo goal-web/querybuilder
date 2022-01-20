@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-type Callback func(*Builder) *Builder
-type Provider func() *Builder
-type whereFunc func(*Builder)
-
 type bindingType string
 type Builder struct {
 	distinct bool
@@ -37,7 +33,7 @@ const (
 	unionBinding   bindingType = "union"
 )
 
-func NewQuery(table string) *Builder {
+func NewQuery(table string) contracts.QueryBuilder {
 	return &Builder{
 		table:    table,
 		fields:   []string{"*"},
@@ -47,17 +43,17 @@ func NewQuery(table string) *Builder {
 		unions:   Unions{},
 		groupBy:  GroupBy{},
 		wheres: &Wheres{
-			wheres:    map[whereJoinType][]*Where{},
-			subWheres: map[whereJoinType][]*Wheres{},
+			wheres:    map[contracts.WhereJoinType][]*Where{},
+			subWheres: map[contracts.WhereJoinType][]*Wheres{},
 		},
 		having: &Wheres{
-			wheres:    map[whereJoinType][]*Where{},
-			subWheres: map[whereJoinType][]*Wheres{},
+			wheres:    map[contracts.WhereJoinType][]*Where{},
+			subWheres: map[contracts.WhereJoinType][]*Wheres{},
 		},
 	}
 }
 
-func FromSub(callback Provider, as string) *Builder {
+func FromSub(callback contracts.QueryProvider, as string) contracts.QueryBuilder {
 	return NewQuery("").FromSub(callback, as)
 }
 
@@ -112,7 +108,7 @@ func (this *Builder) prepareArgs(condition string, args interface{}) (raw string
 	return
 }
 
-func (this *Builder) addBinding(bindType bindingType, bindings ...interface{}) *Builder {
+func (this *Builder) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder {
 	this.bindings[bindType] = append(this.bindings[bindType], bindings...)
 	return this
 }
@@ -127,12 +123,12 @@ func (this *Builder) GetBindings() (results []interface{}) {
 	return
 }
 
-func (this *Builder) Distinct() *Builder {
+func (this *Builder) Distinct() contracts.QueryBuilder {
 	this.distinct = true
 	return this
 }
 
-func (this *Builder) From(table string, as ...string) *Builder {
+func (this *Builder) From(table string, as ...string) contracts.QueryBuilder {
 	if len(as) == 0 {
 		this.table = table
 	} else {
@@ -141,20 +137,20 @@ func (this *Builder) From(table string, as ...string) *Builder {
 	return this
 }
 
-func (this *Builder) FromMany(tables ...string) *Builder {
+func (this *Builder) FromMany(tables ...string) contracts.QueryBuilder {
 	if len(tables) > 0 {
 		this.table = strings.Join(tables, ",")
 	}
 	return this
 }
 
-func (this *Builder) FromSub(provider Provider, as string) *Builder {
+func (this *Builder) FromSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
 	subBuilder := provider()
 	this.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
 	return this.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) When(condition bool, callback Callback, elseCallback ...Callback) *Builder {
+func (this *Builder) When(condition bool, callback contracts.QueryCallback, elseCallback ...contracts.QueryCallback) contracts.QueryBuilder {
 	if condition {
 		return callback(this)
 	} else if len(elseCallback) > 0 {

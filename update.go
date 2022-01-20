@@ -2,10 +2,11 @@ package querybuilder
 
 import (
 	"fmt"
+	"github.com/goal-web/contracts"
 	"strings"
 )
 
-func (this *Builder) UpdateSql(value map[string]interface{}) (sql string, bindings []interface{}) {
+func (this *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []interface{}) {
 	if len(value) == 0 {
 		return
 	}

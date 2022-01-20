@@ -3,7 +3,14 @@ module github.com/goal-web/querybuilder
 go 1.17
 
 require (
-	github.com/goal-web/contracts v0.0.0-20220120002635-287c7ed72d25 // indirect
-	github.com/goal-web/supports v0.0.0-20220120022343-2b715d6e81fc // indirect
-	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2 // indirect
+	github.com/goal-web/contracts v0.0.0-20220120064722-730db09bcdd1
+	github.com/goal-web/supports v0.0.0-20220120022343-2b715d6e81fc
+	github.com/stretchr/testify v1.7.0
+	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )

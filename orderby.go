@@ -2,19 +2,13 @@ package querybuilder
 
 import (
 	"fmt"
+	"github.com/goal-web/contracts"
 	"strings"
-)
-
-type orderType string
-
-const (
-	Desc orderType = "desc"
-	Asc  orderType = "asc"
 )
 
 type OrderBy struct {
 	field          string
-	fieldOrderType orderType
+	fieldOrderType contracts.OrderType
 }
 
 type OrderByFields []OrderBy
@@ -37,7 +31,7 @@ func (this OrderByFields) String() string {
 	return strings.Join(columns, ",")
 }
 
-func (this *Builder) OrderBy(field string, columnOrderType ...orderType) *Builder {
+func (this *Builder) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.QueryBuilder {
 	if len(columnOrderType) > 0 {
 		this.orderBy = append(this.orderBy, OrderBy{
 			field:          field,
@@ -46,17 +40,17 @@ func (this *Builder) OrderBy(field string, columnOrderType ...orderType) *Builde
 	} else {
 		this.orderBy = append(this.orderBy, OrderBy{
 			field:          field,
-			fieldOrderType: Asc,
+			fieldOrderType: contracts.Asc,
 		})
 	}
 
 	return this
 }
 
-func (this *Builder) OrderByDesc(field string) *Builder {
+func (this *Builder) OrderByDesc(field string) contracts.QueryBuilder {
 	this.orderBy = append(this.orderBy, OrderBy{
 		field:          field,
-		fieldOrderType: Desc,
+		fieldOrderType: contracts.Desc,
 	})
 	return this
 }
