@@ -101,5 +101,8 @@ func TestDeleteSql() {
 }
 ```
 
+## 更多高级用法
+正如开头所说，你可以在这里找到几乎所有与 `Laravel` 对应的查询构造器方法，也可以在 [测试文件](https://github.com/goal-web/querybuilder/blob/master/database_test.go) 中找到更多用法
+
 [goal/query-builder](https://github.com/goal-web/querybuilder)  
 qbhy0715@qq.com
