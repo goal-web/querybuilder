@@ -82,7 +82,7 @@ func (this *Builder) FirstOr(provider contracts.InstanceProvider) interface{} {
 	panic("implement me")
 }
 
-func (this *Builder) FirstOrFail(provider contracts.InstanceProvider) interface{} {
+func (this *Builder) FirstOrFail() interface{} {
 	//TODO implement me
 	panic("implement me")
 }
