@@ -50,7 +50,7 @@ const (
 	unionBinding   bindingType = "union"
 )
 
-func NewQuery(table string) contracts.QueryBuilder {
+func NewQuery(table string) *Builder {
 	return &Builder{
 		table:    table,
 		fields:   []string{"*"},
