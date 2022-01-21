@@ -10,6 +10,7 @@ import (
 
 type bindingType string
 type Builder struct {
+	contracts.QueryBuilder
 	limit    int64
 	offset   int64
 	distinct bool
@@ -22,6 +23,12 @@ type Builder struct {
 	unions   Unions
 	having   *Wheres
 	bindings map[bindingType][]interface{}
+}
+
+func (this *Builder) Bind(builder *Builder) contracts.QueryBuilder {
+	this.QueryBuilder = builder
+	builder.QueryBuilder = this
+	return this
 }
 
 func (this *Builder) Skip(offset int64) contracts.QueryBuilder {
@@ -163,10 +170,6 @@ func (this *Builder) WithPagination(perPage int64, current ...int64) contracts.Q
 		this.offset = perPage * (current[0] - 1)
 	}
 	return this
-}
-
-func (this *Builder) SimplePaginate(perPage int64, current ...int64) interface{} {
-	return this.WithPagination(perPage, current...).Get()
 }
 
 func (this *Builder) FromMany(tables ...string) contracts.QueryBuilder {
