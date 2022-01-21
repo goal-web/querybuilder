@@ -25,9 +25,8 @@ type Builder struct {
 	bindings map[bindingType][]interface{}
 }
 
-func (this *Builder) Bind(builder *Builder) contracts.QueryBuilder {
+func (this *Builder) Bind(builder contracts.QueryBuilder) contracts.QueryBuilder {
 	this.QueryBuilder = builder
-	builder.QueryBuilder = this
 	return this
 }
 
