@@ -101,6 +101,13 @@ func (this *Builder) WhereFunc(callback contracts.QueryFunc, whereType ...contra
 	return this.addBinding(whereBinding, subBuilder.GetBindings()...)
 }
 
+func (this *Builder) WhereFields(fields contracts.Fields) contracts.QueryBuilder {
+	for column, value := range fields {
+		this.Where(column, value)
+	}
+	return this
+}
+
 func (this *Builder) OrWhereFunc(callback contracts.QueryFunc) contracts.QueryBuilder {
 	return this.WhereFunc(callback, contracts.Or)
 }
