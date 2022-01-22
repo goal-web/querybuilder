@@ -81,3 +81,22 @@ func (this *Builder) Max(column string, as ...string) int64 {
 func (this *Builder) Min(column string, as ...string) int64 {
 	return this.QueryBuilder.Min(column, as...)
 }
+
+func (this *Builder) SimplePaginate(perPage int64, current ...int64) interface{} {
+	return this.WithPagination(perPage, current...).Get()
+}
+
+func (this *Builder) FirstOr(provider contracts.InstanceProvider) interface{} {
+	if result := this.First(); result != nil {
+		return result
+	}
+	return provider()
+}
+
+func (this *Builder) FirstWhere(column string, args ...interface{}) interface{} {
+	return this.Where(column, args...).First()
+}
+
+func (this *Builder) Paginate(perPage int64, current ...int64) (interface{}, int64) {
+	return this.SimplePaginate(perPage, current...), this.Count()
+}
