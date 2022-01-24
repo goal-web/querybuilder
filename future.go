@@ -2,8 +2,8 @@ package querybuilder
 
 import "github.com/goal-web/contracts"
 
-func (this *Builder) SetTX(tx interface{}) contracts.QueryBuilder {
-	return this.QueryBuilder.SetTX(tx)
+func (this *Builder) SetExecutor(executor contracts.SqlExecutor) contracts.QueryBuilder {
+	return this.QueryBuilder.SetExecutor(executor)
 }
 
 func (this *Builder) Create(fields contracts.Fields) interface{} {
@@ -22,7 +22,7 @@ func (this *Builder) Update(fields contracts.Fields) int64 {
 	return this.QueryBuilder.Update(fields)
 }
 
-func (this *Builder) Get() interface{} {
+func (this *Builder) Get() contracts.DBCollection {
 	return this.QueryBuilder.Get()
 }
 
