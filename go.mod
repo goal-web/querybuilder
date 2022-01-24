@@ -3,7 +3,7 @@ module github.com/goal-web/querybuilder
 go 1.17
 
 require (
-	github.com/goal-web/contracts v0.1.10
+	github.com/goal-web/contracts v0.1.11
 	github.com/goal-web/supports v0.1.10
 	github.com/stretchr/testify v1.7.0
 	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2

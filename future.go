@@ -22,7 +22,7 @@ func (this *Builder) Update(fields contracts.Fields) int64 {
 	return this.QueryBuilder.Update(fields)
 }
 
-func (this *Builder) Get() contracts.DBCollection {
+func (this *Builder) Get() contracts.Collection {
 	return this.QueryBuilder.Get()
 }
 
