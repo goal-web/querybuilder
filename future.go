@@ -82,7 +82,7 @@ func (this *Builder) Min(column string, as ...string) int64 {
 	return this.QueryBuilder.Min(column, as...)
 }
 
-func (this *Builder) SimplePaginate(perPage int64, current ...int64) interface{} {
+func (this *Builder) SimplePaginate(perPage int64, current ...int64) contracts.Collection {
 	return this.WithPagination(perPage, current...).Get()
 }
 
@@ -97,6 +97,6 @@ func (this *Builder) FirstWhere(column string, args ...interface{}) interface{} 
 	return this.Where(column, args...).First()
 }
 
-func (this *Builder) Paginate(perPage int64, current ...int64) (interface{}, int64) {
+func (this *Builder) Paginate(perPage int64, current ...int64) (contracts.Collection, int64) {
 	return this.SimplePaginate(perPage, current...), this.Count()
 }
