@@ -101,6 +101,7 @@ func (this *Builder) prepareArgs(condition string, args interface{}) (raw string
 			stringArg = utils.JoinFloatArray(arg, joinSymbol)
 		case []interface{}:
 			bindings = arg
+			raw = fmt.Sprintf("(%s)", strings.Join(utils.MakeSymbolArray("?", len(bindings)), ","))
 			return
 		default:
 			panic(ParamException{errors.New("不支持的参数类型"), contracts.Fields{

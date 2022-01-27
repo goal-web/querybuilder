@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+const RandomOrder contracts.OrderType = "RANDOM()"
+const RandOrder contracts.OrderType = "RAND()"
+
 type OrderBy struct {
 	field          string
 	fieldOrderType contracts.OrderType
@@ -25,7 +28,11 @@ func (this OrderByFields) String() string {
 	columns := make([]string, 0)
 
 	for _, orderBy := range this {
-		columns = append(columns, fmt.Sprintf("%s %s", orderBy.field, orderBy.fieldOrderType))
+		if orderBy.field == "" {
+			columns = append(columns, fmt.Sprintf("%s", orderBy.fieldOrderType))
+		} else {
+			columns = append(columns, fmt.Sprintf("%s %s", orderBy.field, orderBy.fieldOrderType))
+		}
 	}
 
 	return strings.Join(columns, ",")
@@ -51,6 +58,14 @@ func (this *Builder) OrderByDesc(field string) contracts.QueryBuilder {
 	this.orderBy = append(this.orderBy, OrderBy{
 		field:          field,
 		fieldOrderType: contracts.Desc,
+	})
+	return this
+}
+
+func (this *Builder) InRandomOrder() contracts.QueryBuilder {
+	this.orderBy = append(this.orderBy, OrderBy{
+		field:          "",
+		fieldOrderType: RandomOrder,
 	})
 	return this
 }

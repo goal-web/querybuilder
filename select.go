@@ -5,8 +5,8 @@ import (
 	"github.com/goal-web/contracts"
 )
 
-func (this *Builder) Select(field string, fields ...string) contracts.QueryBuilder {
-	this.fields = append(fields, field)
+func (this *Builder) Select(fields ...string) contracts.QueryBuilder {
+	this.fields = fields
 	return this
 }
 
