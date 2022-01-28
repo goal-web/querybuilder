@@ -225,7 +225,10 @@ func (this *Builder) ToSql() string {
 	}
 
 	if this.limit > 0 {
-		sql = fmt.Sprintf("%s limit %d offset %d", sql, this.limit, this.offset)
+		sql = fmt.Sprintf("%s limit %d", sql, this.limit)
+	}
+	if this.offset > 0 {
+		sql = fmt.Sprintf("%s offset %d", sql, this.offset)
 	}
 
 	if !this.unions.IsEmpty() {
