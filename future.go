@@ -26,6 +26,10 @@ func (this *Builder) Get() contracts.Collection {
 	return this.QueryBuilder.Get()
 }
 
+func (this *Builder) SelectForUpdate() contracts.Collection {
+	return this.QueryBuilder.SelectForUpdate()
+}
+
 func (this *Builder) Find(key interface{}) interface{} {
 	return this.QueryBuilder.Find(key)
 }

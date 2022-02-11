@@ -241,3 +241,7 @@ func (this *Builder) ToSql() string {
 func (this *Builder) SelectSql() (string, []interface{}) {
 	return this.ToSql(), this.GetBindings()
 }
+
+func (this *Builder) SelectForUpdateSql() (string, []interface{}) {
+	return this.ToSql() + " for update", this.GetBindings()
+}

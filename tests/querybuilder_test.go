@@ -84,6 +84,17 @@ func TestSelectSub(t *testing.T) {
 	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
+
+func TestSelectForUpdate(t *testing.T) {
+	sql, bindings := builder.NewQuery("users").
+		Where("id", ">", 1).
+		SelectForUpdateSql()
+	fmt.Println(sql)
+	fmt.Println(bindings)
+	_, err := sqlparser.Parse(sql)
+	assert.Nil(t, err, err)
+}
+
 func TestWhereNotExists(t *testing.T) {
 	sql, bindings := builder.NewQuery("users").
 		Where("id", ">", 1).
@@ -231,7 +242,7 @@ func TestGroupByQueryBuilder(t *testing.T) {
 			return builder.NewQuery("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		GroupBy("country").
-		Having("count(rich_users.id)", "<", 1000). // 人口少
+		Having("count(rich_users.id)", "<", 1000).   // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100) // 或者穷
 
 	fmt.Println(query.ToSql())
@@ -244,7 +255,7 @@ func TestInRandomOrder(t *testing.T) {
 	query := builder.
 		NewQuery("users").
 		GroupBy("country").
-		Having("count(rich_users.id)", "<", 1000). // 人口少
+		Having("count(rich_users.id)", "<", 1000).    // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100). // 或者穷
 		InRandomOrder()
 
