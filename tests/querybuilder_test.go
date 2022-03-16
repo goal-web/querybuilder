@@ -70,6 +70,18 @@ func TestUpdateSql(t *testing.T) {
 	fmt.Println(bindings)
 	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
+
+	rawUpdateSql, rawUpdateBindings := builder.NewQuery("users").
+		Where("id", ">", 1).
+		UpdateSql(contracts.Fields{
+			"name":  "qbhy",
+			"age":   builder.Expression("`age` + 10"),
+			"money": 100000000000,
+		})
+	fmt.Println(rawUpdateSql)
+	fmt.Println(rawUpdateBindings)
+	_, rawUpdateErr := sqlparser.Parse(rawUpdateSql)
+	assert.Nil(t, rawUpdateErr, rawUpdateErr)
 }
 
 func TestSelectSub(t *testing.T) {

@@ -6,14 +6,20 @@ import (
 	"strings"
 )
 
+type Expression string
+
 func (this *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []interface{}) {
 	if len(value) == 0 {
 		return
 	}
 	valuesString := make([]string, 0)
 	for name, field := range value {
-		valuesString = append(valuesString, fmt.Sprintf("%s = ?", name))
-		bindings = append(bindings, field)
+		if expression, isExpression := field.(Expression); isExpression {
+			valuesString = append(valuesString, fmt.Sprintf("%s = %s", name, expression))
+		} else {
+			valuesString = append(valuesString, fmt.Sprintf("%s = ?", name))
+			bindings = append(bindings, field)
+		}
 	}
 
 	sql = fmt.Sprintf("update %s set %s", this.table, strings.Join(valuesString, ","))
