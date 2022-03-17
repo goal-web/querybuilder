@@ -62,10 +62,15 @@ func (this *Builder) OrderByDesc(field string) contracts.QueryBuilder {
 	return this
 }
 
-func (this *Builder) InRandomOrder() contracts.QueryBuilder {
+func (this *Builder) InRandomOrder(orderFunc ...contracts.OrderType) contracts.QueryBuilder {
+	fn := RandomOrder
+	if len(orderFunc) > 0 {
+		fn = orderFunc[0]
+	}
+
 	this.orderBy = append(this.orderBy, OrderBy{
 		field:          "",
-		fieldOrderType: RandomOrder,
+		fieldOrderType: fn,
 	})
 	return this
 }
