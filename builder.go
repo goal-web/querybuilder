@@ -78,6 +78,9 @@ func (this *Builder) getWheres() *Wheres {
 }
 
 func (this *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
+	if expression, isExpression := args.(Expression); isExpression {
+		return string(expression), bindings
+	}
 	condition = strings.ToLower(condition)
 	switch condition {
 	case "in", "not in", "between", "not between":
