@@ -97,6 +97,28 @@ func TestSelectSub(t *testing.T) {
 	assert.Nil(t, err, err)
 }
 
+func TestWhereByExpression(t *testing.T) {
+	sql, bindings := builder.NewQuery("users").
+		Where("id", ">", 1).
+		WhereIn("user_id", builder.Expression("(select user_id from follows where follower_id=1)")).
+		SelectSql()
+	fmt.Println(sql)
+	fmt.Println(bindings)
+	_, err := sqlparser.Parse(sql)
+	assert.Nil(t, err, err)
+}
+
+func TestWhereByQuery(t *testing.T) {
+	sql, bindings := builder.NewQuery("users").
+		Where("id", ">", 1).
+		WhereIn("user_id", builder.NewQuery("follows").Where("follower_id", 2)).
+		SelectSql()
+	fmt.Println(sql)
+	fmt.Println(bindings)
+	_, err := sqlparser.Parse(sql)
+	assert.Nil(t, err, err)
+}
+
 func TestSelectForUpdate(t *testing.T) {
 	sql, bindings := builder.NewQuery("users").
 		Where("id", ">", 1).

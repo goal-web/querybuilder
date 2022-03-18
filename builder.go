@@ -80,6 +80,10 @@ func (this *Builder) getWheres() *Wheres {
 func (this *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
 	if expression, isExpression := args.(Expression); isExpression {
 		return string(expression), bindings
+	} else if builder, isBuilder := args.(contracts.QueryBuilder); isBuilder {
+		raw, bindings = builder.SelectSql()
+		raw = fmt.Sprintf("(%s)", raw)
+		return
 	}
 	condition = strings.ToLower(condition)
 	switch condition {
