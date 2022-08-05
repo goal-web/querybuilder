@@ -275,7 +275,7 @@ func TestGroupByQueryBuilder(t *testing.T) {
 		return builder.NewQuery[contracts.GetFields]("users").Where("amount", ">", 1000)
 	}, "rich_users").
 		GroupBy("country").
-		Having("count(rich_users.id)", "<", 1000).   // 人口少
+		Having("count(rich_users.id)", "<", 1000). // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100) // 或者穷
 
 	fmt.Println(query.ToSql())
@@ -288,7 +288,7 @@ func TestInRandomOrder(t *testing.T) {
 	query := builder.
 		NewQuery[contracts.GetFields]("users").
 		GroupBy("country").
-		Having("count(rich_users.id)", "<", 1000).    // 人口少
+		Having("count(rich_users.id)", "<", 1000). // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100). // 或者穷
 		InRandomOrder()
 
@@ -301,7 +301,7 @@ func TestInRandomOrder(t *testing.T) {
 func TestWhereIn(t *testing.T) {
 	query := builder.
 		NewQuery[contracts.GetFields]("users").
-		WhereNotIn("id", []interface{}{1, 2, 3, 4}).
+		WhereNotIn("id", []any{1, 2, 3, 4}).
 		InRandomOrder()
 
 	sql := query.ToSql()

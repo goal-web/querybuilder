@@ -14,7 +14,7 @@ func getInsertType(insertType2 ...contracts.InsertType) contracts.InsertType {
 	return contracts.Insert
 }
 
-func (this *Builder[T]) CreateSql(value contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
+func (this *Builder[T]) CreateSql(value contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []any) {
 	if len(value) == 0 {
 		return
 	}
@@ -30,7 +30,7 @@ func (this *Builder[T]) CreateSql(value contracts.Fields, insertType2 ...contrac
 	return
 }
 
-func (this *Builder[T]) InsertSql(values []contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
+func (this *Builder[T]) InsertSql(values []contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []any) {
 	if len(values) == 0 {
 		return
 	}
@@ -50,10 +50,10 @@ func (this *Builder[T]) InsertSql(values []contracts.Fields, insertType2 ...cont
 	return
 }
 
-func (this *Builder[T]) InsertIgnoreSql(values []contracts.Fields) (sql string, bindings []interface{}) {
+func (this *Builder[T]) InsertIgnoreSql(values []contracts.Fields) (sql string, bindings []any) {
 	return this.InsertSql(values, contracts.InsertIgnore)
 }
 
-func (this *Builder[T]) InsertReplaceSql(values []contracts.Fields) (sql string, bindings []interface{}) {
+func (this *Builder[T]) InsertReplaceSql(values []contracts.Fields) (sql string, bindings []any) {
 	return this.InsertSql(values, contracts.InsertReplace)
 }

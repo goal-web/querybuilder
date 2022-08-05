@@ -22,7 +22,7 @@ type Builder[T contracts.GetFields] struct {
 	joins    Joins
 	unions   Unions[T]
 	having   *Wheres
-	bindings map[bindingType][]interface{}
+	bindings map[bindingType][]any
 }
 
 func (this *Builder[T]) Bind(builder contracts.QueryBuilder[T]) contracts.QueryBuilder[T] {
@@ -54,7 +54,7 @@ func NewQuery[T contracts.GetFields](table string) *Builder[T] {
 		table:    table,
 		fields:   []string{"*"},
 		orderBy:  OrderByFields{},
-		bindings: map[bindingType][]interface{}{},
+		bindings: map[bindingType][]any{},
 		joins:    Joins{},
 		unions:   Unions[T]{},
 		groupBy:  GroupBy{},
@@ -77,7 +77,7 @@ func (this *Builder[T]) getWheres() *Wheres {
 	return this.wheres
 }
 
-func (this *Builder[T]) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
+func (this *Builder[T]) prepareArgs(condition string, args any) (raw string, bindings []any) {
 	if expression, isExpression := args.(Expression); isExpression {
 		return string(expression), bindings
 	} else if builder, isBuilder := args.(contracts.QueryBuilder[T]); isBuilder {
@@ -106,7 +106,7 @@ func (this *Builder[T]) prepareArgs(condition string, args interface{}) (raw str
 			stringArg = utils.JoinFloat64Array(arg, joinSymbol)
 		case []float32:
 			stringArg = utils.JoinFloatArray(arg, joinSymbol)
-		case []interface{}:
+		case []any:
 			bindings = arg
 			raw = fmt.Sprintf("(%s)", strings.Join(utils.MakeSymbolArray("?", len(bindings)), ","))
 			return
@@ -132,12 +132,12 @@ func (this *Builder[T]) prepareArgs(condition string, args interface{}) (raw str
 	return
 }
 
-func (this *Builder[T]) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder[T] {
+func (this *Builder[T]) addBinding(bindType bindingType, bindings ...any) contracts.QueryBuilder[T] {
 	this.bindings[bindType] = append(this.bindings[bindType], bindings...)
 	return this
 }
 
-func (this *Builder[T]) GetBindings() (results []interface{}) {
+func (this *Builder[T]) GetBindings() (results []any) {
 	for _, binding := range []bindingType{
 		selectBinding, fromBinding, joinBinding,
 		whereBinding, groupByBinding, havingBinding, orderBinding, unionBinding,
@@ -245,10 +245,10 @@ func (this *Builder[T]) ToSql() string {
 	return sql
 }
 
-func (this *Builder[T]) SelectSql() (string, []interface{}) {
+func (this *Builder[T]) SelectSql() (string, []any) {
 	return this.ToSql(), this.GetBindings()
 }
 
-func (this *Builder[T]) SelectForUpdateSql() (string, []interface{}) {
+func (this *Builder[T]) SelectForUpdateSql() (string, []any) {
 	return this.ToSql() + " for update", this.GetBindings()
 }

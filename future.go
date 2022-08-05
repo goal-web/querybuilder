@@ -30,7 +30,7 @@ func (this *Builder[T]) SelectForUpdate() contracts.Collection[T] {
 	return this.QueryBuilder.SelectForUpdate()
 }
 
-func (this *Builder[T]) Find(key interface{}) T {
+func (this *Builder[T]) Find(key any) (T, bool) {
 	return this.QueryBuilder.Find(key)
 }
 
@@ -97,7 +97,7 @@ func (this *Builder[T]) FirstOr(provider func() T) T {
 	return provider()
 }
 
-func (this *Builder[T]) FirstWhere(column string, args ...interface{}) (T, bool) {
+func (this *Builder[T]) FirstWhere(column string, args ...any) (T, bool) {
 	return this.Where(column, args...).First()
 }
 

@@ -90,7 +90,7 @@ func (this *Builder[T]) WhereFunc(callback contracts.QueryFunc[T], whereType ...
 			wheres:    map[contracts.WhereJoinType][]*Where{},
 			subWheres: map[contracts.WhereJoinType][]*Wheres{},
 		},
-		bindings: map[bindingType][]interface{}{},
+		bindings: map[bindingType][]any{},
 	}
 	callback(subBuilder)
 	if len(whereType) == 0 {
@@ -112,9 +112,9 @@ func (this *Builder[T]) OrWhereFunc(callback contracts.QueryFunc[T]) contracts.Q
 	return this.WhereFunc(callback, contracts.Or)
 }
 
-func (this *Builder[T]) Where(field string, args ...interface{}) contracts.QueryBuilder[T] {
+func (this *Builder[T]) Where(field string, args ...any) contracts.QueryBuilder[T] {
 	var (
-		arg       interface{}
+		arg       any
 		condition = "="
 		whereType = contracts.And
 	)
@@ -141,9 +141,9 @@ func (this *Builder[T]) Where(field string, args ...interface{}) contracts.Query
 	return this.addBinding(whereBinding, bindings...)
 }
 
-func (this *Builder[T]) OrWhere(field string, args ...interface{}) contracts.QueryBuilder[T] {
+func (this *Builder[T]) OrWhere(field string, args ...any) contracts.QueryBuilder[T] {
 	var (
-		arg       interface{}
+		arg       any
 		condition = "="
 	)
 	switch len(args) {
