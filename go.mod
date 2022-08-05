@@ -1,6 +1,6 @@
 module github.com/goal-web/querybuilder
 
-go 1.17
+go 1.19
 
 require (
 	github.com/goal-web/contracts v0.1.57
@@ -13,4 +13,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200605160147-a5ece683394c // indirect
+)
+
+replace (
+	github.com/goal-web/contracts => ../contracts
 )

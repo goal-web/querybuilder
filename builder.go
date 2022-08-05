@@ -9,8 +9,8 @@ import (
 )
 
 type bindingType string
-type Builder struct {
-	contracts.QueryBuilder
+type Builder[T contracts.GetFields] struct {
+	contracts.QueryBuilder[T]
 	limit    int64
 	offset   int64
 	distinct bool
@@ -20,21 +20,21 @@ type Builder struct {
 	orderBy  OrderByFields
 	groupBy  GroupBy
 	joins    Joins
-	unions   Unions
+	unions   Unions[T]
 	having   *Wheres
 	bindings map[bindingType][]interface{}
 }
 
-func (this *Builder) Bind(builder contracts.QueryBuilder) contracts.QueryBuilder {
+func (this *Builder[T]) Bind(builder contracts.QueryBuilder[T]) contracts.QueryBuilder[T] {
 	this.QueryBuilder = builder
 	return this
 }
 
-func (this *Builder) Skip(offset int64) contracts.QueryBuilder {
+func (this *Builder[T]) Skip(offset int64) contracts.QueryBuilder[T] {
 	return this.Offset(offset)
 }
 
-func (this *Builder) Take(num int64) contracts.QueryBuilder {
+func (this *Builder[T]) Take(num int64) contracts.QueryBuilder[T] {
 	return this.Limit(num)
 }
 
@@ -49,14 +49,14 @@ const (
 	unionBinding   bindingType = "union"
 )
 
-func NewQuery(table string) *Builder {
-	return &Builder{
+func NewQuery[T contracts.GetFields](table string) *Builder[T] {
+	return &Builder[T]{
 		table:    table,
 		fields:   []string{"*"},
 		orderBy:  OrderByFields{},
 		bindings: map[bindingType][]interface{}{},
 		joins:    Joins{},
-		unions:   Unions{},
+		unions:   Unions[T]{},
 		groupBy:  GroupBy{},
 		wheres: &Wheres{
 			wheres:    map[contracts.WhereJoinType][]*Where{},
@@ -69,18 +69,18 @@ func NewQuery(table string) *Builder {
 	}
 }
 
-func FromSub(callback contracts.QueryProvider, as string) contracts.QueryBuilder {
-	return NewQuery("").FromSub(callback, as)
+func FromSub[T contracts.GetFields](callback contracts.QueryProvider[T], as string) contracts.QueryBuilder[T] {
+	return NewQuery[T]("").FromSub(callback, as)
 }
 
-func (this *Builder) getWheres() *Wheres {
+func (this *Builder[T]) getWheres() *Wheres {
 	return this.wheres
 }
 
-func (this *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
+func (this *Builder[T]) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
 	if expression, isExpression := args.(Expression); isExpression {
 		return string(expression), bindings
-	} else if builder, isBuilder := args.(contracts.QueryBuilder); isBuilder {
+	} else if builder, isBuilder := args.(contracts.QueryBuilder[T]); isBuilder {
 		raw, bindings = builder.SelectSql()
 		raw = fmt.Sprintf("(%s)", raw)
 		return
@@ -132,12 +132,12 @@ func (this *Builder) prepareArgs(condition string, args interface{}) (raw string
 	return
 }
 
-func (this *Builder) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder {
+func (this *Builder[T]) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder[T] {
 	this.bindings[bindType] = append(this.bindings[bindType], bindings...)
 	return this
 }
 
-func (this *Builder) GetBindings() (results []interface{}) {
+func (this *Builder[T]) GetBindings() (results []interface{}) {
 	for _, binding := range []bindingType{
 		selectBinding, fromBinding, joinBinding,
 		whereBinding, groupByBinding, havingBinding, orderBinding, unionBinding,
@@ -147,12 +147,12 @@ func (this *Builder) GetBindings() (results []interface{}) {
 	return
 }
 
-func (this *Builder) Distinct() contracts.QueryBuilder {
+func (this *Builder[T]) Distinct() contracts.QueryBuilder[T] {
 	this.distinct = true
 	return this
 }
 
-func (this *Builder) From(table string, as ...string) contracts.QueryBuilder {
+func (this *Builder[T]) From(table string, as ...string) contracts.QueryBuilder[T] {
 	if len(as) == 0 {
 		this.table = table
 	} else {
@@ -161,17 +161,17 @@ func (this *Builder) From(table string, as ...string) contracts.QueryBuilder {
 	return this
 }
 
-func (this *Builder) Offset(offset int64) contracts.QueryBuilder {
+func (this *Builder[T]) Offset(offset int64) contracts.QueryBuilder[T] {
 	this.offset = offset
 	return this
 }
 
-func (this *Builder) Limit(num int64) contracts.QueryBuilder {
+func (this *Builder[T]) Limit(num int64) contracts.QueryBuilder[T] {
 	this.limit = num
 	return this
 }
 
-func (this *Builder) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder {
+func (this *Builder[T]) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder[T] {
 	this.limit = perPage
 	if len(current) > 0 {
 		this.offset = perPage * (current[0] - 1)
@@ -179,20 +179,20 @@ func (this *Builder) WithPagination(perPage int64, current ...int64) contracts.Q
 	return this
 }
 
-func (this *Builder) FromMany(tables ...string) contracts.QueryBuilder {
+func (this *Builder[T]) FromMany(tables ...string) contracts.QueryBuilder[T] {
 	if len(tables) > 0 {
 		this.table = strings.Join(tables, ",")
 	}
 	return this
 }
 
-func (this *Builder) FromSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
+func (this *Builder[T]) FromSub(provider contracts.QueryProvider[T], as string) contracts.QueryBuilder[T] {
 	subBuilder := provider()
 	this.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
 	return this.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) When(condition bool, callback contracts.QueryCallback, elseCallback ...contracts.QueryCallback) contracts.QueryBuilder {
+func (this *Builder[T]) When(condition bool, callback contracts.QueryCallback[T], elseCallback ...contracts.QueryCallback[T]) contracts.QueryBuilder[T] {
 	if condition {
 		return callback(this)
 	} else if len(elseCallback) > 0 {
@@ -201,14 +201,14 @@ func (this *Builder) When(condition bool, callback contracts.QueryCallback, else
 	return this
 }
 
-func (this *Builder) getSelect() string {
+func (this *Builder[T]) getSelect() string {
 	if this.distinct {
 		return "distinct " + strings.Join(this.fields, ",")
 	}
 	return strings.Join(this.fields, ",")
 }
 
-func (this *Builder) ToSql() string {
+func (this *Builder[T]) ToSql() string {
 	sql := fmt.Sprintf("select %s from %s", this.getSelect(), this.table)
 
 	if !this.joins.IsEmpty() {
@@ -245,10 +245,10 @@ func (this *Builder) ToSql() string {
 	return sql
 }
 
-func (this *Builder) SelectSql() (string, []interface{}) {
+func (this *Builder[T]) SelectSql() (string, []interface{}) {
 	return this.ToSql(), this.GetBindings()
 }
 
-func (this *Builder) SelectForUpdateSql() (string, []interface{}) {
+func (this *Builder[T]) SelectForUpdateSql() (string, []interface{}) {
 	return this.ToSql() + " for update", this.GetBindings()
 }

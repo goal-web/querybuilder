@@ -5,13 +5,13 @@ import (
 	"github.com/goal-web/contracts"
 )
 
-type Unions map[contracts.UnionJoinType][]contracts.QueryBuilder
+type Unions[T contracts.GetFields] map[contracts.UnionJoinType][]contracts.QueryBuilder[T]
 
-func (this Unions) IsEmpty() bool {
+func (this Unions[T]) IsEmpty() bool {
 	return len(this) == 0
 }
 
-func (this Unions) String() (result string) {
+func (this Unions[T]) String() (result string) {
 	if this.IsEmpty() {
 		return
 	}
@@ -24,7 +24,7 @@ func (this Unions) String() (result string) {
 	return
 }
 
-func (this *Builder) Union(builder contracts.QueryBuilder, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
+func (this *Builder[T]) Union(builder contracts.QueryBuilder[T], unionType ...contracts.UnionJoinType) contracts.QueryBuilder[T] {
 	if builder != nil {
 		if len(unionType) > 0 {
 			this.unions[unionType[0]] = append(this.unions[unionType[0]], builder)
@@ -36,14 +36,14 @@ func (this *Builder) Union(builder contracts.QueryBuilder, unionType ...contract
 	return this.addBinding(unionBinding, builder.GetBindings()...)
 }
 
-func (this *Builder) UnionAll(builder contracts.QueryBuilder) contracts.QueryBuilder {
+func (this *Builder[T]) UnionAll(builder contracts.QueryBuilder[T]) contracts.QueryBuilder[T] {
 	return this.Union(builder, contracts.UnionAll)
 }
 
-func (this *Builder) UnionByProvider(builder contracts.QueryProvider, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
+func (this *Builder[T]) UnionByProvider(builder contracts.QueryProvider[T], unionType ...contracts.UnionJoinType) contracts.QueryBuilder[T] {
 	return this.Union(builder(), unionType...)
 }
 
-func (this *Builder) UnionAllByProvider(builder contracts.QueryProvider) contracts.QueryBuilder {
+func (this *Builder[T]) UnionAllByProvider(builder contracts.QueryProvider[T]) contracts.QueryBuilder[T] {
 	return this.Union(builder(), contracts.UnionAll)
 }
