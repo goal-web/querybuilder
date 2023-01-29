@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-func (this *Builder) DeleteSql() (sql string, bindings []interface{}) {
-	sql = fmt.Sprintf("delete from %s", this.table)
+func (builder *Builder) DeleteSql() (sql string, bindings []interface{}) {
+	sql = fmt.Sprintf("delete from %s", builder.table)
 
-	if !this.wheres.IsEmpty() {
-		sql = fmt.Sprintf("%s where %s", sql, this.wheres.String())
+	if !builder.wheres.IsEmpty() {
+		sql = fmt.Sprintf("%s where %s", sql, builder.wheres.String())
 	}
-	bindings = this.GetBindings()
+	bindings = builder.GetBindings()
 	return
 }

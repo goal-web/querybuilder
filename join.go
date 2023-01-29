@@ -42,12 +42,12 @@ func (this Joins) String() (result string) {
 	return
 }
 
-func (this *Builder) Join(table string, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder {
+func (builder *Builder) Join(table string, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder {
 	join := contracts.InnerJoin
 	if len(joins) > 0 {
 		join = joins[0]
 	}
-	this.joins = append(this.joins, Join{table, join, &Wheres{wheres: map[contracts.WhereJoinType][]*Where{
+	builder.joins = append(builder.joins, Join{table, join, &Wheres{wheres: map[contracts.WhereJoinType][]*Where{
 		contracts.And: {&Where{
 			field:     first,
 			condition: condition,
@@ -55,16 +55,16 @@ func (this *Builder) Join(table string, first, condition, second string, joins .
 		}},
 	}}})
 
-	return this
+	return builder
 }
 
-func (this *Builder) JoinSub(provider contracts.QueryProvider, as, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder {
+func (builder *Builder) JoinSub(provider contracts.QueryProvider, as, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder {
 	join := contracts.InnerJoin
 	if len(joins) > 0 {
 		join = joins[0]
 	}
 	subBuilder := provider()
-	this.joins = append(this.joins, Join{fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as), join, &Wheres{wheres: map[contracts.WhereJoinType][]*Where{
+	builder.joins = append(builder.joins, Join{fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as), join, &Wheres{wheres: map[contracts.WhereJoinType][]*Where{
 		contracts.And: {&Where{
 			field:     first,
 			condition: condition,
@@ -72,20 +72,20 @@ func (this *Builder) JoinSub(provider contracts.QueryProvider, as, first, condit
 		}},
 	}}})
 
-	return this.addBinding(joinBinding, subBuilder.GetBindings()...)
+	return builder.addBinding(joinBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) FullJoin(table string, first, condition, second string) contracts.QueryBuilder {
-	return this.Join(table, first, condition, second, contracts.FullJoin)
+func (builder *Builder) FullJoin(table string, first, condition, second string) contracts.QueryBuilder {
+	return builder.Join(table, first, condition, second, contracts.FullJoin)
 }
-func (this *Builder) FullOutJoin(table string, first, condition, second string) contracts.QueryBuilder {
-	return this.Join(table, first, condition, second, contracts.FullOutJoin)
-}
-
-func (this *Builder) LeftJoin(table string, first, condition, second string) contracts.QueryBuilder {
-	return this.Join(table, first, condition, second, contracts.LeftJoin)
+func (builder *Builder) FullOutJoin(table string, first, condition, second string) contracts.QueryBuilder {
+	return builder.Join(table, first, condition, second, contracts.FullOutJoin)
 }
 
-func (this *Builder) RightJoin(table string, first, condition, second string) contracts.QueryBuilder {
-	return this.Join(table, first, condition, second, contracts.RightJoin)
+func (builder *Builder) LeftJoin(table string, first, condition, second string) contracts.QueryBuilder {
+	return builder.Join(table, first, condition, second, contracts.LeftJoin)
+}
+
+func (builder *Builder) RightJoin(table string, first, condition, second string) contracts.QueryBuilder {
+	return builder.Join(table, first, condition, second, contracts.RightJoin)
 }

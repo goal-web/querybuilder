@@ -19,13 +19,13 @@ func (this GroupBy) String() string {
 	return strings.Join(this, ",")
 }
 
-func (this *Builder) GroupBy(columns ...string) contracts.QueryBuilder {
-	this.groupBy = append(this.groupBy, columns...)
+func (builder *Builder) GroupBy(columns ...string) contracts.QueryBuilder {
+	builder.groupBy = append(builder.groupBy, columns...)
 
-	return this
+	return builder
 }
 
-func (this *Builder) Having(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder) Having(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -43,18 +43,18 @@ func (this *Builder) Having(field string, args ...interface{}) contracts.QueryBu
 		whereType = args[2].(contracts.WhereJoinType)
 	}
 
-	raw, bindings := this.prepareArgs(condition, arg)
+	raw, bindings := builder.prepareArgs(condition, arg)
 
-	this.having.wheres[whereType] = append(this.having.wheres[whereType], &Where{
+	builder.having.wheres[whereType] = append(builder.having.wheres[whereType], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,
 	})
 
-	return this.addBinding(havingBinding, bindings...)
+	return builder.addBinding(havingBinding, bindings...)
 }
 
-func (this *Builder) OrHaving(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder) OrHaving(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -69,12 +69,12 @@ func (this *Builder) OrHaving(field string, args ...interface{}) contracts.Query
 		condition = args[0].(string)
 		arg = args[1]
 	}
-	raw, bindings := this.prepareArgs(condition, arg)
+	raw, bindings := builder.prepareArgs(condition, arg)
 
-	this.having.wheres[contracts.Or] = append(this.having.wheres[contracts.Or], &Where{
+	builder.having.wheres[contracts.Or] = append(builder.having.wheres[contracts.Or], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,
 	})
-	return this.addBinding(havingBinding, bindings...)
+	return builder.addBinding(havingBinding, bindings...)
 }

@@ -5,14 +5,16 @@ import (
 )
 
 type ParamException struct {
-	error
-	fields contracts.Fields
+	Err       error
+	Arg       interface{}
+	Condition string
+	previous  *contracts.Exception
 }
 
 func (p ParamException) Error() string {
-	return p.error.Error()
+	return p.Err.Error()
 }
 
-func (p ParamException) Fields() contracts.Fields {
-	return p.fields
+func (p ParamException) GetPrevious() *contracts.Exception {
+	return p.previous
 }

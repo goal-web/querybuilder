@@ -38,39 +38,39 @@ func (this OrderByFields) String() string {
 	return strings.Join(columns, ",")
 }
 
-func (this *Builder) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.QueryBuilder {
+func (builder *Builder) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.QueryBuilder {
 	if len(columnOrderType) > 0 {
-		this.orderBy = append(this.orderBy, OrderBy{
+		builder.orderBy = append(builder.orderBy, OrderBy{
 			field:          field,
 			fieldOrderType: columnOrderType[0],
 		})
 	} else {
-		this.orderBy = append(this.orderBy, OrderBy{
+		builder.orderBy = append(builder.orderBy, OrderBy{
 			field:          field,
 			fieldOrderType: contracts.Asc,
 		})
 	}
 
-	return this
+	return builder
 }
 
-func (this *Builder) OrderByDesc(field string) contracts.QueryBuilder {
-	this.orderBy = append(this.orderBy, OrderBy{
+func (builder *Builder) OrderByDesc(field string) contracts.QueryBuilder {
+	builder.orderBy = append(builder.orderBy, OrderBy{
 		field:          field,
 		fieldOrderType: contracts.Desc,
 	})
-	return this
+	return builder
 }
 
-func (this *Builder) InRandomOrder(orderFunc ...contracts.OrderType) contracts.QueryBuilder {
+func (builder *Builder) InRandomOrder(orderFunc ...contracts.OrderType) contracts.QueryBuilder {
 	fn := RandomOrder
 	if len(orderFunc) > 0 {
 		fn = orderFunc[0]
 	}
 
-	this.orderBy = append(this.orderBy, OrderBy{
+	builder.orderBy = append(builder.orderBy, OrderBy{
 		field:          "",
 		fieldOrderType: fn,
 	})
-	return this
+	return builder
 }

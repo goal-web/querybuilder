@@ -14,7 +14,7 @@ func getInsertType(insertType2 ...contracts.InsertType) contracts.InsertType {
 	return contracts.Insert
 }
 
-func (this *Builder) CreateSql(value contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
+func (builder *Builder) CreateSql(value contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
 	if len(value) == 0 {
 		return
 	}
@@ -26,11 +26,11 @@ func (this *Builder) CreateSql(value contracts.Fields, insertType2 ...contracts.
 		keys = append(keys, name)
 	}
 
-	sql = fmt.Sprintf("%s into %s %s values %s", getInsertType(insertType2...), this.table, fmt.Sprintf("(%s)", strings.Join(keys, ",")), valuesString)
+	sql = fmt.Sprintf("%s into %s %s values %s", getInsertType(insertType2...), builder.table, fmt.Sprintf("(%s)", strings.Join(keys, ",")), valuesString)
 	return
 }
 
-func (this *Builder) InsertSql(values []contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
+func (builder *Builder) InsertSql(values []contracts.Fields, insertType2 ...contracts.InsertType) (sql string, bindings []interface{}) {
 	if len(values) == 0 {
 		return
 	}
@@ -46,14 +46,14 @@ func (this *Builder) InsertSql(values []contracts.Fields, insertType2 ...contrac
 
 	fieldsString := fmt.Sprintf(" (%s)", strings.Join(fields, ","))
 
-	sql = fmt.Sprintf("%s into %s%s values %s", getInsertType(insertType2...), this.table, fieldsString, strings.Join(valuesString, ","))
+	sql = fmt.Sprintf("%s into %s%s values %s", getInsertType(insertType2...), builder.table, fieldsString, strings.Join(valuesString, ","))
 	return
 }
 
-func (this *Builder) InsertIgnoreSql(values []contracts.Fields) (sql string, bindings []interface{}) {
-	return this.InsertSql(values, contracts.InsertIgnore)
+func (builder *Builder) InsertIgnoreSql(values []contracts.Fields) (sql string, bindings []interface{}) {
+	return builder.InsertSql(values, contracts.InsertIgnore)
 }
 
-func (this *Builder) InsertReplaceSql(values []contracts.Fields) (sql string, bindings []interface{}) {
-	return this.InsertSql(values, contracts.InsertReplace)
+func (builder *Builder) InsertReplaceSql(values []contracts.Fields) (sql string, bindings []interface{}) {
+	return builder.InsertSql(values, contracts.InsertReplace)
 }

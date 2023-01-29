@@ -5,35 +5,35 @@ import (
 	"github.com/goal-web/contracts"
 )
 
-func (this *Builder) WhereExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
+func (builder *Builder) WhereExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
 	subBuilder := provider()
 	subSql := fmt.Sprintf("(%s)", subBuilder.ToSql())
 	if len(where) == 0 {
-		return this.addBinding(whereBinding, subBuilder.GetBindings()...).
+		return builder.addBinding(whereBinding, subBuilder.GetBindings()...).
 			Where("", "exists", subSql)
 	}
 
-	return this.addBinding(whereBinding, subBuilder.GetBindings()...).
+	return builder.addBinding(whereBinding, subBuilder.GetBindings()...).
 		Where("", "exists", subSql, where[0])
 
 }
 
-func (this *Builder) OrWhereExists(provider contracts.QueryProvider) contracts.QueryBuilder {
-	return this.WhereExists(provider, contracts.Or)
+func (builder *Builder) OrWhereExists(provider contracts.QueryProvider) contracts.QueryBuilder {
+	return builder.WhereExists(provider, contracts.Or)
 }
 
-func (this *Builder) WhereNotExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
+func (builder *Builder) WhereNotExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
 	subBuilder := provider()
 	subSql := fmt.Sprintf("(%s)", subBuilder.ToSql())
 	if len(where) == 0 {
-		return this.addBinding(whereBinding, subBuilder.GetBindings()...).
+		return builder.addBinding(whereBinding, subBuilder.GetBindings()...).
 			Where("", "not exists", subSql)
 	}
 
-	return this.addBinding(whereBinding, subBuilder.GetBindings()...).
+	return builder.addBinding(whereBinding, subBuilder.GetBindings()...).
 		Where("", "not exists", subSql, where[0])
 }
 
-func (this *Builder) OrWhereNotExists(provider contracts.QueryProvider) contracts.QueryBuilder {
-	return this.WhereNotExists(provider, contracts.Or)
+func (builder *Builder) OrWhereNotExists(provider contracts.QueryProvider) contracts.QueryBuilder {
+	return builder.WhereNotExists(provider, contracts.Or)
 }

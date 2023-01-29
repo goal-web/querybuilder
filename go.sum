@@ -1,10 +1,12 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/goal-web/contracts v0.1.57 h1:aPu9CBOuRjaxAEXtXgnzi1aLuuNSWViGSceeKC0Rsu0=
-github.com/goal-web/contracts v0.1.57/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
-github.com/goal-web/supports v0.1.16 h1:df2hSZIP27peIO4LOZNn+0iupXhmWpCt5d/+t4qMsZE=
-github.com/goal-web/supports v0.1.16/go.mod h1:/+evgdJrancJk2NRGrdnxAgc+fiApcBFieI9sPdvXvg=
+github.com/goal-web/contracts v0.1.65 h1:oDOUixpZsm91uczojKfONurn57cxrSYO0k10jRlIFZg=
+github.com/goal-web/contracts v0.1.65/go.mod h1:lKHynU2Kgk6xyxL4afOJM4TO1kSa3RrCJ2bm5RtFMBw=
+github.com/goal-web/supports v0.1.31 h1:/cHWvrUNvQno8MvfLKEeaa+LDD40RtQDVaDbeMX8fcA=
+github.com/goal-web/supports v0.1.31/go.mod h1:dy7mJ6gF18f80pNcrWOpoNz9yNrt00BIKvkzgSCOrpg=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

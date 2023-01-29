@@ -24,26 +24,26 @@ func (this Unions) String() (result string) {
 	return
 }
 
-func (this *Builder) Union(builder contracts.QueryBuilder, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
+func (builder *Builder) Union(b contracts.QueryBuilder, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
 	if builder != nil {
 		if len(unionType) > 0 {
-			this.unions[unionType[0]] = append(this.unions[unionType[0]], builder)
+			builder.unions[unionType[0]] = append(builder.unions[unionType[0]], b)
 		} else {
-			this.unions[contracts.Union] = append(this.unions[contracts.Union], builder)
+			builder.unions[contracts.Union] = append(builder.unions[contracts.Union], b)
 		}
 	}
 
-	return this.addBinding(unionBinding, builder.GetBindings()...)
+	return builder.addBinding(unionBinding, builder.GetBindings()...)
 }
 
-func (this *Builder) UnionAll(builder contracts.QueryBuilder) contracts.QueryBuilder {
-	return this.Union(builder, contracts.UnionAll)
+func (builder *Builder) UnionAll(b contracts.QueryBuilder) contracts.QueryBuilder {
+	return builder.Union(b, contracts.UnionAll)
 }
 
-func (this *Builder) UnionByProvider(builder contracts.QueryProvider, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
-	return this.Union(builder(), unionType...)
+func (builder *Builder) UnionByProvider(provider contracts.QueryProvider, unionType ...contracts.UnionJoinType) contracts.QueryBuilder {
+	return builder.Union(provider(), unionType...)
 }
 
-func (this *Builder) UnionAllByProvider(builder contracts.QueryProvider) contracts.QueryBuilder {
-	return this.Union(builder(), contracts.UnionAll)
+func (builder *Builder) UnionAllByProvider(provider contracts.QueryProvider) contracts.QueryBuilder {
+	return builder.Union(provider(), contracts.UnionAll)
 }

@@ -8,7 +8,7 @@ import (
 
 type Expression string
 
-func (this *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []interface{}) {
+func (builder *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []interface{}) {
 	if len(value) == 0 {
 		return
 	}
@@ -22,13 +22,13 @@ func (this *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []i
 		}
 	}
 
-	sql = fmt.Sprintf("update %s set %s", this.table, strings.Join(valuesString, ","))
+	sql = fmt.Sprintf("update %s set %s", builder.table, strings.Join(valuesString, ","))
 
-	if !this.wheres.IsEmpty() {
-		sql = fmt.Sprintf("%s where %s", sql, this.wheres.String())
+	if !builder.wheres.IsEmpty() {
+		sql = fmt.Sprintf("%s where %s", sql, builder.wheres.String())
 	}
 
-	bindings = append(bindings, this.bindings[whereBinding]...)
+	bindings = append(bindings, builder.bindings[whereBinding]...)
 
 	return
 }

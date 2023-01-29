@@ -84,7 +84,7 @@ func (this *Wheres) String() (result string) {
 	return
 }
 
-func (this *Builder) WhereFunc(callback contracts.QueryFunc, whereType ...contracts.WhereJoinType) contracts.QueryBuilder {
+func (builder *Builder) WhereFunc(callback contracts.QueryFunc, whereType ...contracts.WhereJoinType) contracts.QueryBuilder {
 	subBuilder := &Builder{
 		wheres: &Wheres{
 			wheres:    map[contracts.WhereJoinType][]*Where{},
@@ -94,25 +94,25 @@ func (this *Builder) WhereFunc(callback contracts.QueryFunc, whereType ...contra
 	}
 	callback(subBuilder)
 	if len(whereType) == 0 {
-		this.wheres.subWheres[contracts.And] = append(this.wheres.subWheres[contracts.And], subBuilder.getWheres())
+		builder.wheres.subWheres[contracts.And] = append(builder.wheres.subWheres[contracts.And], subBuilder.getWheres())
 	} else {
-		this.wheres.subWheres[whereType[0]] = append(this.wheres.subWheres[whereType[0]], subBuilder.getWheres())
+		builder.wheres.subWheres[whereType[0]] = append(builder.wheres.subWheres[whereType[0]], subBuilder.getWheres())
 	}
-	return this.addBinding(whereBinding, subBuilder.GetBindings()...)
+	return builder.addBinding(whereBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) WhereFields(fields contracts.Fields) contracts.QueryBuilder {
+func (builder *Builder) WhereFields(fields contracts.Fields) contracts.QueryBuilder {
 	for column, value := range fields {
-		this.Where(column, value)
+		builder.Where(column, value)
 	}
-	return this
+	return builder
 }
 
-func (this *Builder) OrWhereFunc(callback contracts.QueryFunc) contracts.QueryBuilder {
-	return this.WhereFunc(callback, contracts.Or)
+func (builder *Builder) OrWhereFunc(callback contracts.QueryFunc) contracts.QueryBuilder {
+	return builder.WhereFunc(callback, contracts.Or)
 }
 
-func (this *Builder) Where(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder) Where(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -130,18 +130,18 @@ func (this *Builder) Where(field string, args ...interface{}) contracts.QueryBui
 		whereType = args[2].(contracts.WhereJoinType)
 	}
 
-	raw, bindings := this.prepareArgs(condition, arg)
+	raw, bindings := builder.prepareArgs(condition, arg)
 
-	this.wheres.wheres[whereType] = append(this.wheres.wheres[whereType], &Where{
+	builder.wheres.wheres[whereType] = append(builder.wheres.wheres[whereType], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,
 	})
 
-	return this.addBinding(whereBinding, bindings...)
+	return builder.addBinding(whereBinding, bindings...)
 }
 
-func (this *Builder) OrWhere(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder) OrWhere(field string, args ...interface{}) contracts.QueryBuilder {
 	var (
 		arg       interface{}
 		condition = "="
@@ -156,14 +156,14 @@ func (this *Builder) OrWhere(field string, args ...interface{}) contracts.QueryB
 		condition = args[0].(string)
 		arg = args[1]
 	}
-	raw, bindings := this.prepareArgs(condition, arg)
+	raw, bindings := builder.prepareArgs(condition, arg)
 
-	this.wheres.wheres[contracts.Or] = append(this.wheres.wheres[contracts.Or], &Where{
+	builder.wheres.wheres[contracts.Or] = append(builder.wheres.wheres[contracts.Or], &Where{
 		field:     field,
 		condition: condition,
 		arg:       raw,
 	})
-	return this.addBinding(whereBinding, bindings...)
+	return builder.addBinding(whereBinding, bindings...)
 }
 
 func JoinStringerArray(arr []fmt.Stringer, sep string) (result string) {

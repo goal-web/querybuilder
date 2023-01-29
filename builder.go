@@ -25,17 +25,17 @@ type Builder struct {
 	bindings map[bindingType][]interface{}
 }
 
-func (this *Builder) Bind(builder contracts.QueryBuilder) contracts.QueryBuilder {
-	this.QueryBuilder = builder
-	return this
+func (builder *Builder) Bind(b contracts.QueryBuilder) contracts.QueryBuilder {
+	builder.QueryBuilder = b
+	return builder
 }
 
-func (this *Builder) Skip(offset int64) contracts.QueryBuilder {
-	return this.Offset(offset)
+func (builder *Builder) Skip(offset int64) contracts.QueryBuilder {
+	return builder.Offset(offset)
 }
 
-func (this *Builder) Take(num int64) contracts.QueryBuilder {
-	return this.Limit(num)
+func (builder *Builder) Take(num int64) contracts.QueryBuilder {
+	return builder.Limit(num)
 }
 
 const (
@@ -73,11 +73,11 @@ func FromSub(callback contracts.QueryProvider, as string) contracts.QueryBuilder
 	return NewQuery("").FromSub(callback, as)
 }
 
-func (this *Builder) getWheres() *Wheres {
-	return this.wheres
+func (builder *Builder) getWheres() *Wheres {
+	return builder.wheres
 }
 
-func (this *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
+func (builder *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
 	if expression, isExpression := args.(Expression); isExpression {
 		return string(expression), bindings
 	} else if builder, isBuilder := args.(contracts.QueryBuilder); isBuilder {
@@ -111,10 +111,11 @@ func (this *Builder) prepareArgs(condition string, args interface{}) (raw string
 			raw = fmt.Sprintf("(%s)", strings.Join(utils.MakeSymbolArray("?", len(bindings)), ","))
 			return
 		default:
-			panic(ParamException{errors.New("不支持的参数类型"), contracts.Fields{
-				"arg":       arg,
-				"condition": condition,
-			}})
+			panic(ParamException{
+				Err:       errors.New("不支持的参数类型"),
+				Arg:       arg,
+				Condition: condition,
+			})
 		}
 		bindings = utils.StringArray2InterfaceArray(strings.Split(stringArg, joinSymbol))
 		if isInGrammar {
@@ -132,123 +133,123 @@ func (this *Builder) prepareArgs(condition string, args interface{}) (raw string
 	return
 }
 
-func (this *Builder) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder {
-	this.bindings[bindType] = append(this.bindings[bindType], bindings...)
-	return this
+func (builder *Builder) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder {
+	builder.bindings[bindType] = append(builder.bindings[bindType], bindings...)
+	return builder
 }
 
-func (this *Builder) GetBindings() (results []interface{}) {
+func (builder *Builder) GetBindings() (results []interface{}) {
 	for _, binding := range []bindingType{
 		selectBinding, fromBinding, joinBinding,
 		whereBinding, groupByBinding, havingBinding, orderBinding, unionBinding,
 	} {
-		results = append(results, this.bindings[binding]...)
+		results = append(results, builder.bindings[binding]...)
 	}
 	return
 }
 
-func (this *Builder) Distinct() contracts.QueryBuilder {
-	this.distinct = true
-	return this
+func (builder *Builder) Distinct() contracts.QueryBuilder {
+	builder.distinct = true
+	return builder
 }
 
-func (this *Builder) From(table string, as ...string) contracts.QueryBuilder {
+func (builder *Builder) From(table string, as ...string) contracts.QueryBuilder {
 	if len(as) == 0 {
-		this.table = table
+		builder.table = table
 	} else {
-		this.table = fmt.Sprintf("%s as %s", table, as[0])
+		builder.table = fmt.Sprintf("%s as %s", table, as[0])
 	}
-	return this
+	return builder
 }
 
-func (this *Builder) Offset(offset int64) contracts.QueryBuilder {
-	this.offset = offset
-	return this
+func (builder *Builder) Offset(offset int64) contracts.QueryBuilder {
+	builder.offset = offset
+	return builder
 }
 
-func (this *Builder) Limit(num int64) contracts.QueryBuilder {
-	this.limit = num
-	return this
+func (builder *Builder) Limit(num int64) contracts.QueryBuilder {
+	builder.limit = num
+	return builder
 }
 
-func (this *Builder) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder {
-	this.limit = perPage
+func (builder *Builder) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder {
+	builder.limit = perPage
 	if len(current) > 0 {
-		this.offset = perPage * (current[0] - 1)
+		builder.offset = perPage * (current[0] - 1)
 	}
-	return this
+	return builder
 }
 
-func (this *Builder) FromMany(tables ...string) contracts.QueryBuilder {
+func (builder *Builder) FromMany(tables ...string) contracts.QueryBuilder {
 	if len(tables) > 0 {
-		this.table = strings.Join(tables, ",")
+		builder.table = strings.Join(tables, ",")
 	}
-	return this
+	return builder
 }
 
-func (this *Builder) FromSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
+func (builder *Builder) FromSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
 	subBuilder := provider()
-	this.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
-	return this.addBinding(fromBinding, subBuilder.GetBindings()...)
+	builder.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
+	return builder.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
-func (this *Builder) When(condition bool, callback contracts.QueryCallback, elseCallback ...contracts.QueryCallback) contracts.QueryBuilder {
+func (builder *Builder) When(condition bool, callback contracts.QueryCallback, elseCallback ...contracts.QueryCallback) contracts.QueryBuilder {
 	if condition {
-		return callback(this)
+		return callback(builder)
 	} else if len(elseCallback) > 0 {
-		return elseCallback[0](this)
+		return elseCallback[0](builder)
 	}
-	return this
+	return builder
 }
 
-func (this *Builder) getSelect() string {
-	if this.distinct {
-		return "distinct " + strings.Join(this.fields, ",")
+func (builder *Builder) getSelect() string {
+	if builder.distinct {
+		return "distinct " + strings.Join(builder.fields, ",")
 	}
-	return strings.Join(this.fields, ",")
+	return strings.Join(builder.fields, ",")
 }
 
-func (this *Builder) ToSql() string {
-	sql := fmt.Sprintf("select %s from %s", this.getSelect(), this.table)
+func (builder *Builder) ToSql() string {
+	sql := fmt.Sprintf("select %s from %s", builder.getSelect(), builder.table)
 
-	if !this.joins.IsEmpty() {
-		sql = fmt.Sprintf("%s %s", sql, this.joins.String())
+	if !builder.joins.IsEmpty() {
+		sql = fmt.Sprintf("%s %s", sql, builder.joins.String())
 	}
 
-	if !this.wheres.IsEmpty() {
-		sql = fmt.Sprintf("%s where %s", sql, this.wheres.String())
+	if !builder.wheres.IsEmpty() {
+		sql = fmt.Sprintf("%s where %s", sql, builder.wheres.String())
 	}
 
-	if !this.groupBy.IsEmpty() {
-		sql = fmt.Sprintf("%s group by %s", sql, this.groupBy.String())
+	if !builder.groupBy.IsEmpty() {
+		sql = fmt.Sprintf("%s group by %s", sql, builder.groupBy.String())
 
-		if !this.having.IsEmpty() {
-			sql = fmt.Sprintf("%s having %s", sql, this.having.String())
+		if !builder.having.IsEmpty() {
+			sql = fmt.Sprintf("%s having %s", sql, builder.having.String())
 		}
 	}
 
-	if !this.orderBy.IsEmpty() {
-		sql = fmt.Sprintf("%s order by %s", sql, this.orderBy.String())
+	if !builder.orderBy.IsEmpty() {
+		sql = fmt.Sprintf("%s order by %s", sql, builder.orderBy.String())
 	}
 
-	if this.limit > 0 {
-		sql = fmt.Sprintf("%s limit %d", sql, this.limit)
+	if builder.limit > 0 {
+		sql = fmt.Sprintf("%s limit %d", sql, builder.limit)
 	}
-	if this.offset > 0 {
-		sql = fmt.Sprintf("%s offset %d", sql, this.offset)
+	if builder.offset > 0 {
+		sql = fmt.Sprintf("%s offset %d", sql, builder.offset)
 	}
 
-	if !this.unions.IsEmpty() {
-		sql = fmt.Sprintf("(%s) %s", sql, this.unions.String())
+	if !builder.unions.IsEmpty() {
+		sql = fmt.Sprintf("(%s) %s", sql, builder.unions.String())
 	}
 
 	return sql
 }
 
-func (this *Builder) SelectSql() (string, []interface{}) {
-	return this.ToSql(), this.GetBindings()
+func (builder *Builder) SelectSql() (string, []interface{}) {
+	return builder.ToSql(), builder.GetBindings()
 }
 
-func (this *Builder) SelectForUpdateSql() (string, []interface{}) {
-	return this.ToSql() + " for update", this.GetBindings()
+func (builder *Builder) SelectForUpdateSql() (string, []interface{}) {
+	return builder.ToSql() + " for update", builder.GetBindings()
 }
