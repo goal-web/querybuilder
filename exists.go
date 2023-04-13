@@ -5,7 +5,7 @@ import (
 	"github.com/goal-web/contracts"
 )
 
-func (builder *Builder) WhereExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
+func (builder *Builder[T]) WhereExists(provider contracts.QueryProvider[T], where ...contracts.WhereJoinType) contracts.Query[T] {
 	subBuilder := provider()
 	subSql := fmt.Sprintf("(%s)", subBuilder.ToSql())
 	if len(where) == 0 {
@@ -18,11 +18,11 @@ func (builder *Builder) WhereExists(provider contracts.QueryProvider, where ...c
 
 }
 
-func (builder *Builder) OrWhereExists(provider contracts.QueryProvider) contracts.QueryBuilder {
+func (builder *Builder[T]) OrWhereExists(provider contracts.QueryProvider[T]) contracts.Query[T] {
 	return builder.WhereExists(provider, contracts.Or)
 }
 
-func (builder *Builder) WhereNotExists(provider contracts.QueryProvider, where ...contracts.WhereJoinType) contracts.QueryBuilder {
+func (builder *Builder[T]) WhereNotExists(provider contracts.QueryProvider[T], where ...contracts.WhereJoinType) contracts.Query[T] {
 	subBuilder := provider()
 	subSql := fmt.Sprintf("(%s)", subBuilder.ToSql())
 	if len(where) == 0 {
@@ -34,6 +34,6 @@ func (builder *Builder) WhereNotExists(provider contracts.QueryProvider, where .
 		Where("", "not exists", subSql, where[0])
 }
 
-func (builder *Builder) OrWhereNotExists(provider contracts.QueryProvider) contracts.QueryBuilder {
+func (builder *Builder[T]) OrWhereNotExists(provider contracts.QueryProvider[T]) contracts.Query[T] {
 	return builder.WhereNotExists(provider, contracts.Or)
 }

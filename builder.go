@@ -9,8 +9,8 @@ import (
 )
 
 type bindingType string
-type Builder struct {
-	contracts.QueryBuilder
+type Builder[T any] struct {
+	contracts.QueryExecutor[T]
 	limit    int64
 	offset   int64
 	distinct bool
@@ -20,21 +20,21 @@ type Builder struct {
 	orderBy  OrderByFields
 	groupBy  GroupBy
 	joins    Joins
-	unions   Unions
+	unions   Unions[T]
 	having   *Wheres
-	bindings map[bindingType][]interface{}
+	bindings map[bindingType][]any
 }
 
-func (builder *Builder) Bind(b contracts.QueryBuilder) contracts.QueryBuilder {
-	builder.QueryBuilder = b
+func (builder *Builder[T]) Bind(executor contracts.QueryExecutor[T]) contracts.Query[T] {
+	builder.QueryExecutor = executor
 	return builder
 }
 
-func (builder *Builder) Skip(offset int64) contracts.QueryBuilder {
+func (builder *Builder[T]) Skip(offset int64) contracts.Query[T] {
 	return builder.Offset(offset)
 }
 
-func (builder *Builder) Take(num int64) contracts.QueryBuilder {
+func (builder *Builder[T]) Take(num int64) contracts.Query[T] {
 	return builder.Limit(num)
 }
 
@@ -49,39 +49,15 @@ const (
 	unionBinding   bindingType = "union"
 )
 
-func NewQuery(table string) *Builder {
-	return &Builder{
-		table:    table,
-		fields:   []string{"*"},
-		orderBy:  OrderByFields{},
-		bindings: map[bindingType][]interface{}{},
-		joins:    Joins{},
-		unions:   Unions{},
-		groupBy:  GroupBy{},
-		wheres: &Wheres{
-			wheres:    map[contracts.WhereJoinType][]*Where{},
-			subWheres: map[contracts.WhereJoinType][]*Wheres{},
-		},
-		having: &Wheres{
-			wheres:    map[contracts.WhereJoinType][]*Where{},
-			subWheres: map[contracts.WhereJoinType][]*Wheres{},
-		},
-	}
-}
-
-func FromSub(callback contracts.QueryProvider, as string) contracts.QueryBuilder {
-	return NewQuery("").FromSub(callback, as)
-}
-
-func (builder *Builder) getWheres() *Wheres {
+func (builder *Builder[T]) getWheres() *Wheres {
 	return builder.wheres
 }
 
-func (builder *Builder) prepareArgs(condition string, args interface{}) (raw string, bindings []interface{}) {
+func (builder *Builder[T]) prepareArgs(condition string, args any) (raw string, bindings []any) {
 	if expression, isExpression := args.(Expression); isExpression {
 		return string(expression), bindings
-	} else if builder, isBuilder := args.(contracts.QueryBuilder); isBuilder {
-		raw, bindings = builder.SelectSql()
+	} else if instance, isBuilder := args.(contracts.QueryBuilder[T]); isBuilder {
+		raw, bindings = instance.SelectSql()
 		raw = fmt.Sprintf("(%s)", raw)
 		return
 	}
@@ -106,7 +82,7 @@ func (builder *Builder) prepareArgs(condition string, args interface{}) (raw str
 			stringArg = utils.JoinFloat64Array(arg, joinSymbol)
 		case []float32:
 			stringArg = utils.JoinFloatArray(arg, joinSymbol)
-		case []interface{}:
+		case []any:
 			bindings = arg
 			raw = fmt.Sprintf("(%s)", strings.Join(utils.MakeSymbolArray("?", len(bindings)), ","))
 			return
@@ -124,21 +100,21 @@ func (builder *Builder) prepareArgs(condition string, args interface{}) (raw str
 			raw = "? and ?"
 		}
 	case "is", "is not", "exists", "not exists":
-		raw = utils.ConvertToString(args, "")
+		raw = utils.ToString(args, "")
 	default:
 		raw = "?"
-		bindings = append(bindings, utils.ConvertToString(args, ""))
+		bindings = append(bindings, utils.ToString(args, ""))
 	}
 
 	return
 }
 
-func (builder *Builder) addBinding(bindType bindingType, bindings ...interface{}) contracts.QueryBuilder {
+func (builder *Builder[T]) addBinding(bindType bindingType, bindings ...any) contracts.Query[T] {
 	builder.bindings[bindType] = append(builder.bindings[bindType], bindings...)
 	return builder
 }
 
-func (builder *Builder) GetBindings() (results []interface{}) {
+func (builder *Builder[T]) GetBindings() (results []any) {
 	for _, binding := range []bindingType{
 		selectBinding, fromBinding, joinBinding,
 		whereBinding, groupByBinding, havingBinding, orderBinding, unionBinding,
@@ -148,12 +124,12 @@ func (builder *Builder) GetBindings() (results []interface{}) {
 	return
 }
 
-func (builder *Builder) Distinct() contracts.QueryBuilder {
+func (builder *Builder[T]) Distinct() contracts.Query[T] {
 	builder.distinct = true
 	return builder
 }
 
-func (builder *Builder) From(table string, as ...string) contracts.QueryBuilder {
+func (builder *Builder[T]) From(table string, as ...string) contracts.Query[T] {
 	if len(as) == 0 {
 		builder.table = table
 	} else {
@@ -162,17 +138,17 @@ func (builder *Builder) From(table string, as ...string) contracts.QueryBuilder 
 	return builder
 }
 
-func (builder *Builder) Offset(offset int64) contracts.QueryBuilder {
+func (builder *Builder[T]) Offset(offset int64) contracts.Query[T] {
 	builder.offset = offset
 	return builder
 }
 
-func (builder *Builder) Limit(num int64) contracts.QueryBuilder {
+func (builder *Builder[T]) Limit(num int64) contracts.Query[T] {
 	builder.limit = num
 	return builder
 }
 
-func (builder *Builder) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder {
+func (builder *Builder[T]) WithPagination(perPage int64, current ...int64) contracts.Query[T] {
 	builder.limit = perPage
 	if len(current) > 0 {
 		builder.offset = perPage * (current[0] - 1)
@@ -180,20 +156,20 @@ func (builder *Builder) WithPagination(perPage int64, current ...int64) contract
 	return builder
 }
 
-func (builder *Builder) FromMany(tables ...string) contracts.QueryBuilder {
+func (builder *Builder[T]) FromMany(tables ...string) contracts.Query[T] {
 	if len(tables) > 0 {
 		builder.table = strings.Join(tables, ",")
 	}
 	return builder
 }
 
-func (builder *Builder) FromSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
+func (builder *Builder[T]) FromSub(provider contracts.QueryProvider[T], as string) contracts.Query[T] {
 	subBuilder := provider()
 	builder.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
 	return builder.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
-func (builder *Builder) When(condition bool, callback contracts.QueryCallback, elseCallback ...contracts.QueryCallback) contracts.QueryBuilder {
+func (builder *Builder[T]) When(condition bool, callback contracts.QueryCallback[T], elseCallback ...contracts.QueryCallback[T]) contracts.Query[T] {
 	if condition {
 		return callback(builder)
 	} else if len(elseCallback) > 0 {
@@ -202,14 +178,14 @@ func (builder *Builder) When(condition bool, callback contracts.QueryCallback, e
 	return builder
 }
 
-func (builder *Builder) getSelect() string {
+func (builder *Builder[T]) getSelect() string {
 	if builder.distinct {
 		return "distinct " + strings.Join(builder.fields, ",")
 	}
 	return strings.Join(builder.fields, ",")
 }
 
-func (builder *Builder) ToSql() string {
+func (builder *Builder[T]) ToSql() string {
 	sql := fmt.Sprintf("select %s from %s", builder.getSelect(), builder.table)
 
 	if !builder.joins.IsEmpty() {
@@ -246,10 +222,10 @@ func (builder *Builder) ToSql() string {
 	return sql
 }
 
-func (builder *Builder) SelectSql() (string, []interface{}) {
+func (builder *Builder[T]) SelectSql() (string, []any) {
 	return builder.ToSql(), builder.GetBindings()
 }
 
-func (builder *Builder) SelectForUpdateSql() (string, []interface{}) {
+func (builder *Builder[T]) SelectForUpdateSql() (string, []any) {
 	return builder.ToSql() + " for update", builder.GetBindings()
 }

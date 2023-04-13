@@ -8,7 +8,7 @@ import (
 
 type Expression string
 
-func (builder *Builder) UpdateSql(value contracts.Fields) (sql string, bindings []interface{}) {
+func (builder *Builder[T]) UpdateSql(value contracts.Fields) (sql string, bindings []any) {
 	if len(value) == 0 {
 		return
 	}

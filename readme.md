@@ -132,7 +132,7 @@ func TestSimpleQueryBuilder(t *testing.T) {
 func TestJoinQueryBuilder(t *testing.T) {
 	query := builder.NewQuery("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		JoinSub(func() contracts.QueryBuilder {
+		JoinSub(func() contracts.Query[T] {
 			return builder.NewQuery("users").
 				Where("level", ">", 5)
 		}, "vip_users", "vip_users.id", "=", "users.id").
@@ -145,7 +145,7 @@ func TestJoinQueryBuilder(t *testing.T) {
 }
 
 func TestFromSubQueryBuilder(t *testing.T) {
-	query := builder.FromSub(func() contracts.QueryBuilder {
+	query := builder.FromSub(func() contracts.Query[T] {
 		return builder.NewQuery("users").
 			Where("level", ">", 5)
 	}, "vip_users").
@@ -179,7 +179,7 @@ func TestUpdateSql(t *testing.T) {
 }
 func TestSelectSub(t *testing.T) {
 	sql, bindings := builder.NewQuery("users").Where("id", ">", 1).
-		SelectSub(func() contracts.QueryBuilder {
+		SelectSub(func() contracts.Query[T] {
 			return builder.NewQuery("accounts").Where("accounts.id", "users.id").WithCount()
 		}, "accounts_count").
 		Join("accounts", "accounts.user_id", "=", "users.id").
@@ -192,7 +192,7 @@ func TestSelectSub(t *testing.T) {
 func TestWhereNotExists(t *testing.T) {
 	sql, bindings := builder.NewQuery("users").
 		Where("id", ">", 1).
-		WhereNotExists(func() contracts.QueryBuilder {
+		WhereNotExists(func() contracts.Query[T] {
 			return builder.NewQuery("users").Select("id").Where("age", ">", 18)
 		}).
 		SelectSql()
@@ -281,7 +281,7 @@ func TestUnionQueryBuilder(t *testing.T) {
 		Join("accounts", "accounts.user_id", "=", "users.id").
 		Where("gender", "!=", 0, contracts.Or).
 		UnionByProvider(
-			func() contracts.QueryBuilder {
+			func() contracts.Query[T] {
 				return builder.NewQuery("peoples").Where("id", 5)
 			},
 		).
@@ -304,7 +304,7 @@ func TestComplexQueryBuilder(t *testing.T) {
 
 	query := builder.NewQuery("users")
 	query.
-		FromSub(func() contracts.QueryBuilder {
+		FromSub(func() contracts.Query[T] {
 			return builder.NewQuery("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		Join("accounts", "users.id", "=", "accounts.user_id").
@@ -333,7 +333,7 @@ func TestComplexQueryBuilder(t *testing.T) {
 func TestGroupByQueryBuilder(t *testing.T) {
 
 	query := builder.
-		FromSub(func() contracts.QueryBuilder {
+		FromSub(func() contracts.Query[T] {
 			return builder.NewQuery("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		GroupBy("country").

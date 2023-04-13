@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (builder *Builder) DeleteSql() (sql string, bindings []interface{}) {
+func (builder *Builder[T]) DeleteSql() (sql string, bindings []any) {
 	sql = fmt.Sprintf("delete from %s", builder.table)
 
 	if !builder.wheres.IsEmpty() {
