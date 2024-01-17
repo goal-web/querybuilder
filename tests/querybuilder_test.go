@@ -63,8 +63,12 @@ func TestDistinctQueryBuilder(t *testing.T) {
 }
 
 func TestUpdateSql(t *testing.T) {
+	type Settings struct {
+		Name string `json:"name"`
+	}
 	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).UpdateSql(contracts.Fields{
 		"name": "qbhy", "age": 18, "money": 100000000000,
+		"settings": Settings{Name: "json_name"},
 	})
 	fmt.Println(sql)
 	fmt.Println(bindings)
