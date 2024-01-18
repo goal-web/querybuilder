@@ -186,7 +186,7 @@ func (builder *Builder[T]) getSelect() string {
 }
 
 func (builder *Builder[T]) ToSql() string {
-	sql := fmt.Sprintf("select %s from %s", builder.getSelect(), builder.table)
+	sql := fmt.Sprintf("select %s from `%s`", builder.getSelect(), builder.table)
 
 	if !builder.joins.IsEmpty() {
 		sql = fmt.Sprintf("%s %s", sql, builder.joins.String())
