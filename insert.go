@@ -19,7 +19,7 @@ func getInsertType(insertType2 ...contracts.InsertType) contracts.InsertType {
 func wrapperValue(value any) any {
 	valueType := reflect.TypeOf(value)
 	switch valueType.Kind() {
-	case reflect.Map, reflect.Struct, reflect.Array:
+	case reflect.Map, reflect.Struct, reflect.Array, reflect.Slice:
 		jsonBytes, _ := json.Marshal(value)
 		return fmt.Sprintf("%s", string(jsonBytes))
 	default:
