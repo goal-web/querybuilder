@@ -17,6 +17,9 @@ func getInsertType(insertType2 ...contracts.InsertType) contracts.InsertType {
 }
 
 func wrapperValue(value any) any {
+	if value == nil {
+		return nil
+	}
 	valueType := reflect.TypeOf(value)
 	switch valueType.Kind() {
 	case reflect.Map, reflect.Struct, reflect.Array, reflect.Slice:

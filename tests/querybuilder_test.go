@@ -161,8 +161,8 @@ func TestDeleteSql(t *testing.T) {
 }
 func TestInsertSql(t *testing.T) {
 	sql, bindings := builder.New[contracts.Fields]("users").InsertSql([]contracts.Fields{
-		{"name": "qbhy", "age": 18, "money": 100000000000},
-		{"name": "goal", "age": 18, "money": 10},
+		{"name": "qbhy", "age": 18, "money": 100000000000, "gender": nil},
+		{"name": "goal", "age": 18, "money": 10, "gender": nil},
 	})
 	fmt.Println(sql)
 	fmt.Println(bindings)
