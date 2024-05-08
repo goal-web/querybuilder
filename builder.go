@@ -15,7 +15,7 @@ type Builder[T any] struct {
 	offset   int64
 	distinct bool
 	table    string
-	fields   []string
+	Selects  []string
 	wheres   *Wheres
 	orderBy  OrderByFields
 	groupBy  GroupBy
@@ -180,9 +180,9 @@ func (builder *Builder[T]) When(condition bool, callback contracts.QueryCallback
 
 func (builder *Builder[T]) getSelect() string {
 	if builder.distinct {
-		return "distinct " + strings.Join(builder.fields, ",")
+		return "distinct " + strings.Join(builder.Selects, ",")
 	}
-	return strings.Join(builder.fields, ",")
+	return strings.Join(builder.Selects, ",")
 }
 
 func (builder *Builder[T]) ToSql() string {

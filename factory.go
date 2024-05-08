@@ -8,7 +8,7 @@ import (
 func NewBuilder[T any](table string) *Builder[T] {
 	return &Builder[T]{
 		table:    table,
-		fields:   []string{"*"},
+		Selects:  []string{"*"},
 		orderBy:  OrderByFields{},
 		bindings: map[bindingType][]any{},
 		joins:    Joins{},
@@ -28,7 +28,7 @@ func NewBuilder[T any](table string) *Builder[T] {
 func New[T any](table string) contracts.Query[T] {
 	return &Builder[T]{
 		table:    table,
-		fields:   []string{"*"},
+		Selects:  []string{"*"},
 		orderBy:  OrderByFields{},
 		bindings: map[bindingType][]any{},
 		joins:    Joins{},
