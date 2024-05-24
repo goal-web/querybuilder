@@ -16,20 +16,20 @@ type OrderBy struct {
 
 type OrderByFields []OrderBy
 
-func (this OrderByFields) IsEmpty() bool {
-	return len(this) == 0
+func (orderByFields OrderByFields) IsEmpty() bool {
+	return len(orderByFields) == 0
 }
 
-func (this OrderByFields) String() string {
-	if this.IsEmpty() {
+func (orderByFields OrderByFields) String() string {
+	if orderByFields.IsEmpty() {
 		return ""
 	}
 
 	columns := make([]string, 0)
 
-	for _, orderBy := range this {
+	for _, orderBy := range orderByFields {
 		if orderBy.field == "" {
-			columns = append(columns, fmt.Sprintf("%s", orderBy.fieldOrderType))
+			columns = append(columns, string(orderBy.fieldOrderType))
 		} else {
 			columns = append(columns, fmt.Sprintf("%s %s", orderBy.field, orderBy.fieldOrderType))
 		}

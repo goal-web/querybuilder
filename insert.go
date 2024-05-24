@@ -24,7 +24,7 @@ func wrapperValue(value any) any {
 	switch valueType.Kind() {
 	case reflect.Map, reflect.Struct, reflect.Array, reflect.Slice:
 		jsonBytes, _ := json.Marshal(value)
-		return fmt.Sprintf("%s", string(jsonBytes))
+		return string(jsonBytes)
 	default:
 		return value
 	}

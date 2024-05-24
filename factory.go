@@ -1,7 +1,6 @@
 package querybuilder
 
 import (
-	"fmt"
 	"github.com/goal-web/contracts"
 )
 
@@ -48,12 +47,12 @@ func New[T any](table string) contracts.Query[T] {
 func FromSub[T any](callback contracts.QueryProvider[T], as string) contracts.Query[T] {
 	subQuery := callback()
 	builder := NewBuilder[T]("")
-	builder.table = fmt.Sprintf("(%s) as %s", subQuery.ToSql(), as)
+	builder.fromSub = &fromSub[T]{as: as, subQuery: subQuery}
 	return builder.addBinding(fromBinding, subQuery.GetBindings()...)
 }
 
 func FromQuery[T any](subQuery contracts.QueryBuilder[T], as string) contracts.Query[T] {
 	builder := NewBuilder[T]("")
-	builder.table = fmt.Sprintf("(%s) as %s", subQuery.ToSql(), as)
+	builder.fromSub = &fromSub[T]{as: as, subQuery: subQuery}
 	return builder.addBinding(fromBinding, subQuery.GetBindings()...)
 }

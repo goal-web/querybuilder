@@ -45,9 +45,10 @@ func TestFromSubQueryBuilder(t *testing.T) {
 	}, "vip_users").
 		//WhereIn("gender", "1,2").
 		WhereIn("gender", []int{1, 2})
-	fmt.Println(query.ToSql())
+	sql := query.ToSql()
+	fmt.Println(sql)
 	fmt.Println(query.GetBindings())
-	_, err := sqlparser.Parse(query.ToSql())
+	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 
@@ -266,9 +267,10 @@ func TestComplexQueryBuilder(t *testing.T) {
 		OrderBy("id").
 		GroupBy("country")
 
-	fmt.Println(query.ToSql())
-	fmt.Println(query.GetBindings())
-	_, err := sqlparser.Parse(query.ToSql())
+	sql, bindings := query.SelectSql()
+	fmt.Println(sql)
+	fmt.Println(bindings)
+	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 

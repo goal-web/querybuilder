@@ -10,6 +10,7 @@ import (
 
 type bindingType string
 type Builder[T any] struct {
+	*fromSub[T]
 	contracts.QueryExecutor[T]
 	limit    int64
 	offset   int64
@@ -165,7 +166,7 @@ func (builder *Builder[T]) FromMany(tables ...string) contracts.Query[T] {
 
 func (builder *Builder[T]) FromSub(provider contracts.QueryProvider[T], as string) contracts.Query[T] {
 	subBuilder := provider()
-	builder.table = fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)
+	builder.fromSub = &fromSub[T]{as: as, subQuery: subBuilder}
 	return builder.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
@@ -185,8 +186,15 @@ func (builder *Builder[T]) getSelect() string {
 	return strings.Join(builder.Selects, ",")
 }
 
+func (builder *Builder[T]) getFrom() string {
+	if builder.fromSub != nil {
+		return fmt.Sprintf("(%s) as %s", builder.fromSub.subQuery.ToSql(), builder.as)
+	}
+	return fmt.Sprintf("`%s`", builder.table)
+}
+
 func (builder *Builder[T]) ToSql() string {
-	sql := fmt.Sprintf("select %s from `%s`", builder.getSelect(), builder.table)
+	sql := fmt.Sprintf("select %s from %s", builder.getSelect(), builder.getFrom())
 
 	if !builder.joins.IsEmpty() {
 		sql = fmt.Sprintf("%s %s", sql, builder.joins.String())
