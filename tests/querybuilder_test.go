@@ -204,12 +204,12 @@ func TestCreateSql(t *testing.T) {
 func TestBetweenQueryBuilder(t *testing.T) {
 	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		WhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
+		WhereFunc(func(b contracts.Query[contracts.Fields]) {
 			// 高瘦
 			b.WhereBetween("height", []int{180, 200}).
 				WhereBetween("weight", []int{50, 60}).
 				WhereIn("id", []int{1, 2, 3, 4, 5})
-		}).OrWhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
+		}).OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
 		// 矮胖
 		b.WhereBetween("height", []int{140, 160}).
 			WhereBetween("weight", []int{70, 140}).
@@ -251,12 +251,12 @@ func TestComplexQueryBuilder(t *testing.T) {
 			return builder.New[contracts.Fields]("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		Join("accounts", "users.id", "=", "accounts.user_id").
-		WhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
+		WhereFunc(func(b contracts.Query[contracts.Fields]) {
 			b.Where("name", "goal").
 				Where("age", "<", "18").
 				WhereIn("id", []int{1, 2})
 		}).
-		OrWhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
+		OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
 			b.Where("name", "qbhy").
 				Where("age", ">", 18).
 				WhereNotIn("id", []int{1, 2})
@@ -319,7 +319,7 @@ func TestWhereIn(t *testing.T) {
 func TestWhen(t *testing.T) {
 	query := builder.
 		New[contracts.Fields]("users").
-		When(true, func(q contracts.QueryBuilder[contracts.Fields]) contracts.Query[contracts.Fields] {
+		When(true, func(q contracts.Query[contracts.Fields]) contracts.Query[contracts.Fields] {
 			return q.Where("status", 1)
 		}).
 		WhereNotIn("id", []any{1, 2, 3, 4}).
