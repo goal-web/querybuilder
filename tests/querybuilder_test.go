@@ -17,7 +17,9 @@ func TestSimpleQueryBuilder(t *testing.T) {
 		OrWhere("amount", ">=", 100).
 		WhereIsNull("avatar")
 	fmt.Println(query.ToSql())
+	// select * from `users` where name = ? and age > ? and avatar is null or gender != ? or amount >= ?
 	fmt.Println(query.GetBindings())
+	// [qbhy 18 0 100]
 
 	_, err := sqlparser.Parse(query.ToSql())
 	assert.Nil(t, err, err)
