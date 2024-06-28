@@ -19,15 +19,15 @@ func (this GroupBy) String() string {
 	return strings.Join(this, ",")
 }
 
-func (builder *Builder) GroupBy(columns ...string) contracts.QueryBuilder {
+func (builder *Builder[T]) GroupBy(columns ...string) contracts.Query[T] {
 	builder.groupBy = append(builder.groupBy, columns...)
 
 	return builder
 }
 
-func (builder *Builder) Having(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder[T]) Having(field string, args ...any) contracts.Query[T] {
 	var (
-		arg       interface{}
+		arg       any
 		condition = "="
 		whereType = contracts.And
 	)
@@ -54,9 +54,9 @@ func (builder *Builder) Having(field string, args ...interface{}) contracts.Quer
 	return builder.addBinding(havingBinding, bindings...)
 }
 
-func (builder *Builder) OrHaving(field string, args ...interface{}) contracts.QueryBuilder {
+func (builder *Builder[T]) OrHaving(field string, args ...any) contracts.Query[T] {
 	var (
-		arg       interface{}
+		arg       any
 		condition = "="
 	)
 	switch len(args) {

@@ -10,24 +10,26 @@ import (
 )
 
 func TestSimpleQueryBuilder(t *testing.T) {
-	query := builder.NewQuery("users")
+	query := builder.New[contracts.Fields]("users")
 	query.Where("name", "qbhy").
 		Where("age", ">", 18).
 		Where("gender", "!=", 0, contracts.Or).
 		OrWhere("amount", ">=", 100).
 		WhereIsNull("avatar")
 	fmt.Println(query.ToSql())
+	// select * from `users` where name = ? and age > ? and avatar is null or gender != ? or amount >= ?
 	fmt.Println(query.GetBindings())
+	// [qbhy 18 0 100]
 
 	_, err := sqlparser.Parse(query.ToSql())
 	assert.Nil(t, err, err)
 }
 
 func TestJoinQueryBuilder(t *testing.T) {
-	query := builder.NewQuery("users").
+	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		JoinSub(func() contracts.QueryBuilder {
-			return builder.NewQuery("users").
+		JoinSub(func() contracts.Query[contracts.Fields] {
+			return builder.New[contracts.Fields]("users").
 				Where("level", ">", 5)
 		}, "vip_users", "vip_users.id", "=", "users.id").
 		//WhereIn("gender", "1,2").
@@ -39,20 +41,21 @@ func TestJoinQueryBuilder(t *testing.T) {
 }
 
 func TestFromSubQueryBuilder(t *testing.T) {
-	query := builder.FromSub(func() contracts.QueryBuilder {
-		return builder.NewQuery("users").
+	query := builder.FromSub[contracts.Fields](func() contracts.Query[contracts.Fields] {
+		return builder.New[contracts.Fields]("users").
 			Where("level", ">", 5)
 	}, "vip_users").
 		//WhereIn("gender", "1,2").
 		WhereIn("gender", []int{1, 2})
-	fmt.Println(query.ToSql())
+	sql := query.ToSql()
+	fmt.Println(sql)
 	fmt.Println(query.GetBindings())
-	_, err := sqlparser.Parse(query.ToSql())
+	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 
 func TestDistinctQueryBuilder(t *testing.T) {
-	query := builder.NewQuery("users").
+	query := builder.New[contracts.Fields]("users").
 		Distinct().
 		Join("accounts", "accounts.user_id", "=", "users.id").
 		Where("gender", "!=", 0, contracts.Or)
@@ -63,15 +66,19 @@ func TestDistinctQueryBuilder(t *testing.T) {
 }
 
 func TestUpdateSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").Where("id", ">", 1).UpdateSql(contracts.Fields{
+	type Settings struct {
+		Name string `json:"name"`
+	}
+	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).UpdateSql(contracts.Fields{
 		"name": "qbhy", "age": 18, "money": 100000000000,
+		"settings": Settings{Name: "json_name"},
 	})
 	fmt.Println(sql)
 	fmt.Println(bindings)
 	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 
-	rawUpdateSql, rawUpdateBindings := builder.NewQuery("users").
+	rawUpdateSql, rawUpdateBindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
 		UpdateSql(contracts.Fields{
 			"name":  "qbhy",
@@ -85,9 +92,9 @@ func TestUpdateSql(t *testing.T) {
 }
 
 func TestSelectSub(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").Where("id", ">", 1).
-		SelectSub(func() contracts.QueryBuilder {
-			return builder.NewQuery("accounts").Where("accounts.id", "users.id").WithCount()
+	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).
+		SelectSub(func() contracts.Query[contracts.Fields] {
+			return builder.New[contracts.Fields]("accounts").Where("accounts.id", "users.id").WithCount()
 		}, "accounts_count").
 		Join("accounts", "accounts.user_id", "=", "users.id").
 		SelectSql()
@@ -98,7 +105,7 @@ func TestSelectSub(t *testing.T) {
 }
 
 func TestWhereByExpression(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").
+	sql, bindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
 		WhereIn("user_id", builder.Expression("(select user_id from follows where follower_id=1)")).
 		SelectSql()
@@ -109,9 +116,9 @@ func TestWhereByExpression(t *testing.T) {
 }
 
 func TestWhereByQuery(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").
+	sql, bindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
-		WhereIn("user_id", builder.NewQuery("follows").Where("follower_id", 2)).
+		WhereIn("user_id", builder.New[contracts.Fields]("follows").Where("follower_id", 2)).
 		SelectSql()
 	fmt.Println(sql)
 	fmt.Println(bindings)
@@ -120,7 +127,7 @@ func TestWhereByQuery(t *testing.T) {
 }
 
 func TestSelectForUpdate(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").
+	sql, bindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
 		SelectForUpdateSql()
 	fmt.Println(sql)
@@ -130,10 +137,10 @@ func TestSelectForUpdate(t *testing.T) {
 }
 
 func TestWhereNotExists(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").
+	sql, bindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
-		WhereNotExists(func() contracts.QueryBuilder {
-			return builder.NewQuery("users").Select("id").Where("age", ">", 18)
+		WhereNotExists(func() contracts.Query[contracts.Fields] {
+			return builder.New[contracts.Fields]("users").Select("id").Where("age", ">", 18)
 		}).
 		SelectSql()
 	fmt.Println(sql)
@@ -142,23 +149,23 @@ func TestWhereNotExists(t *testing.T) {
 	assert.Nil(t, err, err)
 }
 func TestCount(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").Where("id", ">", 1).WithCount("id").SelectSql()
+	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).WithCount("id").SelectSql()
 	fmt.Println(sql)
 	fmt.Println(bindings)
 	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 func TestDeleteSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").Where("id", ">", 1).DeleteSql()
+	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).DeleteSql()
 	fmt.Println(sql)
 	fmt.Println(bindings)
 	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 func TestInsertSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").InsertSql([]contracts.Fields{
-		{"name": "qbhy", "age": 18, "money": 100000000000},
-		{"name": "goal", "age": 18, "money": 10},
+	sql, bindings := builder.New[contracts.Fields]("users").InsertSql([]contracts.Fields{
+		{"name": "qbhy", "age": 18, "money": 100000000000, "gender": nil},
+		{"name": "goal", "age": 18, "money": 10, "gender": nil},
 	})
 	fmt.Println(sql)
 	fmt.Println(bindings)
@@ -166,7 +173,7 @@ func TestInsertSql(t *testing.T) {
 	assert.Nil(t, err, err)
 }
 func TestInsertIgnoreSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").InsertIgnoreSql([]contracts.Fields{
+	sql, bindings := builder.New[contracts.Fields]("users").InsertIgnoreSql([]contracts.Fields{
 		{"name": "qbhy", "age": 18, "money": 100000000000},
 		{"name": "goal", "age": 18, "money": 10},
 	})
@@ -176,7 +183,7 @@ func TestInsertIgnoreSql(t *testing.T) {
 	assert.Nil(t, err, err)
 }
 func TestInsertReplaceSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").InsertReplaceSql([]contracts.Fields{
+	sql, bindings := builder.New[contracts.Fields]("users").InsertReplaceSql([]contracts.Fields{
 		{"name": "qbhy", "age": 18, "money": 100000000000},
 		{"name": "goal", "age": 18, "money": 10},
 	})
@@ -187,7 +194,7 @@ func TestInsertReplaceSql(t *testing.T) {
 }
 
 func TestCreateSql(t *testing.T) {
-	sql, bindings := builder.NewQuery("users").CreateSql(contracts.Fields{
+	sql, bindings := builder.New[contracts.Fields]("users").CreateSql(contracts.Fields{
 		"name": "qbhy", "age": 18, "money": 100000000000,
 	})
 	fmt.Println(sql)
@@ -197,14 +204,14 @@ func TestCreateSql(t *testing.T) {
 }
 
 func TestBetweenQueryBuilder(t *testing.T) {
-	query := builder.NewQuery("users").
+	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		WhereFunc(func(b contracts.QueryBuilder) {
+		WhereFunc(func(b contracts.Query[contracts.Fields]) {
 			// 高瘦
 			b.WhereBetween("height", []int{180, 200}).
 				WhereBetween("weight", []int{50, 60}).
 				WhereIn("id", []int{1, 2, 3, 4, 5})
-		}).OrWhereFunc(func(b contracts.QueryBuilder) {
+		}).OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
 		// 矮胖
 		b.WhereBetween("height", []int{140, 160}).
 			WhereBetween("weight", []int{70, 140}).
@@ -217,22 +224,20 @@ func TestBetweenQueryBuilder(t *testing.T) {
 }
 
 func TestUnionQueryBuilder(t *testing.T) {
-	query := builder.NewQuery("users").
+	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
 		Where("gender", "!=", 0, contracts.Or).
-		UnionByProvider(
-			func() contracts.QueryBuilder {
-				return builder.NewQuery("peoples").Where("id", 5)
-			},
-		).
+		UnionByProvider(func() contracts.Query[contracts.Fields] {
+			return builder.New[contracts.Fields]("peoples").Where("id", 5)
+		}).
 		Union(
-			builder.NewQuery("accounts"),
+			builder.New[contracts.Fields]("accounts"),
 		).
 		UnionAll(
-			builder.NewQuery("members"),
+			builder.New[contracts.Fields]("members"),
 		).
 		UnionAll(
-			builder.NewQuery("students"),
+			builder.New[contracts.Fields]("students"),
 		)
 	fmt.Println(query.ToSql())
 	fmt.Println(query.GetBindings())
@@ -242,18 +247,18 @@ func TestUnionQueryBuilder(t *testing.T) {
 
 func TestComplexQueryBuilder(t *testing.T) {
 
-	query := builder.NewQuery("users")
+	query := builder.New[contracts.Fields]("users")
 	query.
-		FromSub(func() contracts.QueryBuilder {
-			return builder.NewQuery("users").Where("amount", ">", 1000)
+		FromSub(func() contracts.Query[contracts.Fields] {
+			return builder.New[contracts.Fields]("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		Join("accounts", "users.id", "=", "accounts.user_id").
-		WhereFunc(func(b contracts.QueryBuilder) {
+		WhereFunc(func(b contracts.Query[contracts.Fields]) {
 			b.Where("name", "goal").
 				Where("age", "<", "18").
 				WhereIn("id", []int{1, 2})
 		}).
-		OrWhereFunc(func(b contracts.QueryBuilder) {
+		OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
 			b.Where("name", "qbhy").
 				Where("age", ">", 18).
 				WhereNotIn("id", []int{1, 2})
@@ -264,17 +269,18 @@ func TestComplexQueryBuilder(t *testing.T) {
 		OrderBy("id").
 		GroupBy("country")
 
-	fmt.Println(query.ToSql())
-	fmt.Println(query.GetBindings())
-	_, err := sqlparser.Parse(query.ToSql())
+	sql, bindings := query.SelectSql()
+	fmt.Println(sql)
+	fmt.Println(bindings)
+	_, err := sqlparser.Parse(sql)
 	assert.Nil(t, err, err)
 }
 
 func TestGroupByQueryBuilder(t *testing.T) {
 	query := builder.
-		FromSub(func() contracts.QueryBuilder {
-			return builder.NewQuery("users").Where("amount", ">", 1000)
-		}, "rich_users").
+		FromSub[contracts.Fields](func() contracts.Query[contracts.Fields] {
+		return builder.New[contracts.Fields]("users").Where("amount", ">", 1000)
+	}, "rich_users").
 		GroupBy("country").
 		Having("count(rich_users.id)", "<", 1000).   // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100) // 或者穷
@@ -287,7 +293,7 @@ func TestGroupByQueryBuilder(t *testing.T) {
 
 func TestInRandomOrder(t *testing.T) {
 	query := builder.
-		NewQuery("users").
+		New[contracts.Fields]("users").
 		GroupBy("country").
 		Having("count(rich_users.id)", "<", 1000).    // 人口少
 		OrHaving("sum(rich_users.amount)", "<", 100). // 或者穷
@@ -301,8 +307,24 @@ func TestInRandomOrder(t *testing.T) {
 
 func TestWhereIn(t *testing.T) {
 	query := builder.
-		NewQuery("users").
-		WhereNotIn("id", []interface{}{1, 2, 3, 4}).
+		New[contracts.Fields]("users").
+		WhereNotIn("id", []any{1, 2, 3, 4}).
+		InRandomOrder()
+
+	sql := query.ToSql()
+	fmt.Println(sql)
+	fmt.Println(query.GetBindings())
+	_, err := sqlparser.Parse(sql)
+	assert.Nil(t, err, err)
+}
+
+func TestWhen(t *testing.T) {
+	query := builder.
+		New[contracts.Fields]("users").
+		When(true, func(q contracts.Query[contracts.Fields]) contracts.Query[contracts.Fields] {
+			return q.Where("status", 1)
+		}).
+		WhereNotIn("id", []any{1, 2, 3, 4}).
 		InRandomOrder()
 
 	sql := query.ToSql()

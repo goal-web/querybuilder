@@ -16,20 +16,20 @@ type OrderBy struct {
 
 type OrderByFields []OrderBy
 
-func (this OrderByFields) IsEmpty() bool {
-	return len(this) == 0
+func (orderByFields OrderByFields) IsEmpty() bool {
+	return len(orderByFields) == 0
 }
 
-func (this OrderByFields) String() string {
-	if this.IsEmpty() {
+func (orderByFields OrderByFields) String() string {
+	if orderByFields.IsEmpty() {
 		return ""
 	}
 
 	columns := make([]string, 0)
 
-	for _, orderBy := range this {
+	for _, orderBy := range orderByFields {
 		if orderBy.field == "" {
-			columns = append(columns, fmt.Sprintf("%s", orderBy.fieldOrderType))
+			columns = append(columns, string(orderBy.fieldOrderType))
 		} else {
 			columns = append(columns, fmt.Sprintf("%s %s", orderBy.field, orderBy.fieldOrderType))
 		}
@@ -38,7 +38,7 @@ func (this OrderByFields) String() string {
 	return strings.Join(columns, ",")
 }
 
-func (builder *Builder) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.QueryBuilder {
+func (builder *Builder[T]) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.Query[T] {
 	if len(columnOrderType) > 0 {
 		builder.orderBy = append(builder.orderBy, OrderBy{
 			field:          field,
@@ -54,7 +54,7 @@ func (builder *Builder) OrderBy(field string, columnOrderType ...contracts.Order
 	return builder
 }
 
-func (builder *Builder) OrderByDesc(field string) contracts.QueryBuilder {
+func (builder *Builder[T]) OrderByDesc(field string) contracts.Query[T] {
 	builder.orderBy = append(builder.orderBy, OrderBy{
 		field:          field,
 		fieldOrderType: contracts.Desc,
@@ -62,7 +62,7 @@ func (builder *Builder) OrderByDesc(field string) contracts.QueryBuilder {
 	return builder
 }
 
-func (builder *Builder) InRandomOrder(orderFunc ...contracts.OrderType) contracts.QueryBuilder {
+func (builder *Builder[T]) InRandomOrder(orderFunc ...contracts.OrderType) contracts.Query[T] {
 	fn := RandomOrder
 	if len(orderFunc) > 0 {
 		fn = orderFunc[0]
