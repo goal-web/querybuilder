@@ -24,7 +24,7 @@ func (unions Unions[T]) String() (result string) {
 	return
 }
 
-func (builder *Builder[T]) Union(b contracts.QueryBuilder[T], unionType ...contracts.UnionJoinType) contracts.Query[T] {
+func (builder *Builder[T]) Union(b contracts.QueryBuilder[T], unionType ...contracts.UnionJoinType) contracts.QueryBuilder[T] {
 	if builder != nil {
 		if len(unionType) > 0 {
 			builder.unions[unionType[0]] = append(builder.unions[unionType[0]], b)
@@ -36,14 +36,14 @@ func (builder *Builder[T]) Union(b contracts.QueryBuilder[T], unionType ...contr
 	return builder.addBinding(unionBinding, builder.GetBindings()...)
 }
 
-func (builder *Builder[T]) UnionAll(b contracts.QueryBuilder[T]) contracts.Query[T] {
+func (builder *Builder[T]) UnionAll(b contracts.QueryBuilder[T]) contracts.QueryBuilder[T] {
 	return builder.Union(b, contracts.UnionAll)
 }
 
-func (builder *Builder[T]) UnionByProvider(provider contracts.QueryProvider[T], unionType ...contracts.UnionJoinType) contracts.Query[T] {
+func (builder *Builder[T]) UnionByProvider(provider contracts.QueryProvider[T], unionType ...contracts.UnionJoinType) contracts.QueryBuilder[T] {
 	return builder.Union(provider(), unionType...)
 }
 
-func (builder *Builder[T]) UnionAllByProvider(provider contracts.QueryProvider[T]) contracts.Query[T] {
+func (builder *Builder[T]) UnionAllByProvider(provider contracts.QueryProvider[T]) contracts.QueryBuilder[T] {
 	return builder.Union(provider(), contracts.UnionAll)
 }

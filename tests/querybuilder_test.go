@@ -28,7 +28,7 @@ func TestSimpleQueryBuilder(t *testing.T) {
 func TestJoinQueryBuilder(t *testing.T) {
 	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		JoinSub(func() contracts.Query[contracts.Fields] {
+		JoinSub(func() contracts.QueryBuilder[contracts.Fields] {
 			return builder.New[contracts.Fields]("users").
 				Where("level", ">", 5)
 		}, "vip_users", "vip_users.id", "=", "users.id").
@@ -41,7 +41,7 @@ func TestJoinQueryBuilder(t *testing.T) {
 }
 
 func TestFromSubQueryBuilder(t *testing.T) {
-	query := builder.FromSub[contracts.Fields](func() contracts.Query[contracts.Fields] {
+	query := builder.FromSub[contracts.Fields](func() contracts.QueryBuilder[contracts.Fields] {
 		return builder.New[contracts.Fields]("users").
 			Where("level", ">", 5)
 	}, "vip_users").
@@ -93,7 +93,7 @@ func TestUpdateSql(t *testing.T) {
 
 func TestSelectSub(t *testing.T) {
 	sql, bindings := builder.New[contracts.Fields]("users").Where("id", ">", 1).
-		SelectSub(func() contracts.Query[contracts.Fields] {
+		SelectSub(func() contracts.QueryBuilder[contracts.Fields] {
 			return builder.New[contracts.Fields]("accounts").Where("accounts.id", "users.id").WithCount()
 		}, "accounts_count").
 		Join("accounts", "accounts.user_id", "=", "users.id").
@@ -139,7 +139,7 @@ func TestSelectForUpdate(t *testing.T) {
 func TestWhereNotExists(t *testing.T) {
 	sql, bindings := builder.New[contracts.Fields]("users").
 		Where("id", ">", 1).
-		WhereNotExists(func() contracts.Query[contracts.Fields] {
+		WhereNotExists(func() contracts.QueryBuilder[contracts.Fields] {
 			return builder.New[contracts.Fields]("users").Select("id").Where("age", ">", 18)
 		}).
 		SelectSql()
@@ -206,12 +206,12 @@ func TestCreateSql(t *testing.T) {
 func TestBetweenQueryBuilder(t *testing.T) {
 	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
-		WhereFunc(func(b contracts.Query[contracts.Fields]) {
+		WhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
 			// 高瘦
 			b.WhereBetween("height", []int{180, 200}).
 				WhereBetween("weight", []int{50, 60}).
 				WhereIn("id", []int{1, 2, 3, 4, 5})
-		}).OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
+		}).OrWhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
 		// 矮胖
 		b.WhereBetween("height", []int{140, 160}).
 			WhereBetween("weight", []int{70, 140}).
@@ -227,7 +227,7 @@ func TestUnionQueryBuilder(t *testing.T) {
 	query := builder.New[contracts.Fields]("users").
 		Join("accounts", "accounts.user_id", "=", "users.id").
 		Where("gender", "!=", 0, contracts.Or).
-		UnionByProvider(func() contracts.Query[contracts.Fields] {
+		UnionByProvider(func() contracts.QueryBuilder[contracts.Fields] {
 			return builder.New[contracts.Fields]("peoples").Where("id", 5)
 		}).
 		Union(
@@ -249,16 +249,16 @@ func TestComplexQueryBuilder(t *testing.T) {
 
 	query := builder.New[contracts.Fields]("users")
 	query.
-		FromSub(func() contracts.Query[contracts.Fields] {
+		FromSub(func() contracts.QueryBuilder[contracts.Fields] {
 			return builder.New[contracts.Fields]("users").Where("amount", ">", 1000)
 		}, "rich_users").
 		Join("accounts", "users.id", "=", "accounts.user_id").
-		WhereFunc(func(b contracts.Query[contracts.Fields]) {
+		WhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
 			b.Where("name", "goal").
 				Where("age", "<", "18").
 				WhereIn("id", []int{1, 2})
 		}).
-		OrWhereFunc(func(b contracts.Query[contracts.Fields]) {
+		OrWhereFunc(func(b contracts.QueryBuilder[contracts.Fields]) {
 			b.Where("name", "qbhy").
 				Where("age", ">", 18).
 				WhereNotIn("id", []int{1, 2})
@@ -278,7 +278,7 @@ func TestComplexQueryBuilder(t *testing.T) {
 
 func TestGroupByQueryBuilder(t *testing.T) {
 	query := builder.
-		FromSub[contracts.Fields](func() contracts.Query[contracts.Fields] {
+		FromSub[contracts.Fields](func() contracts.QueryBuilder[contracts.Fields] {
 		return builder.New[contracts.Fields]("users").Where("amount", ">", 1000)
 	}, "rich_users").
 		GroupBy("country").
@@ -321,7 +321,7 @@ func TestWhereIn(t *testing.T) {
 func TestWhen(t *testing.T) {
 	query := builder.
 		New[contracts.Fields]("users").
-		When(true, func(q contracts.Query[contracts.Fields]) contracts.Query[contracts.Fields] {
+		When(true, func(q contracts.QueryBuilder[contracts.Fields]) contracts.QueryBuilder[contracts.Fields] {
 			return q.Where("status", 1)
 		}).
 		WhereNotIn("id", []any{1, 2, 3, 4}).

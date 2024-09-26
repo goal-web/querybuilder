@@ -26,16 +26,16 @@ type Builder[T any] struct {
 	bindings map[bindingType][]any
 }
 
-func (builder *Builder[T]) Bind(executor contracts.QueryExecutor[T]) contracts.Query[T] {
+func (builder *Builder[T]) Bind(executor contracts.QueryExecutor[T]) contracts.QueryBuilder[T] {
 	builder.QueryExecutor = executor
 	return builder
 }
 
-func (builder *Builder[T]) Skip(offset int64) contracts.Query[T] {
+func (builder *Builder[T]) Skip(offset int64) contracts.QueryBuilder[T] {
 	return builder.Offset(offset)
 }
 
-func (builder *Builder[T]) Take(num int64) contracts.Query[T] {
+func (builder *Builder[T]) Take(num int64) contracts.QueryBuilder[T] {
 	return builder.Limit(num)
 }
 
@@ -110,7 +110,7 @@ func (builder *Builder[T]) prepareArgs(condition string, args any) (raw string, 
 	return
 }
 
-func (builder *Builder[T]) addBinding(bindType bindingType, bindings ...any) contracts.Query[T] {
+func (builder *Builder[T]) addBinding(bindType bindingType, bindings ...any) contracts.QueryBuilder[T] {
 	builder.bindings[bindType] = append(builder.bindings[bindType], bindings...)
 	return builder
 }
@@ -125,12 +125,12 @@ func (builder *Builder[T]) GetBindings() (results []any) {
 	return
 }
 
-func (builder *Builder[T]) Distinct() contracts.Query[T] {
+func (builder *Builder[T]) Distinct() contracts.QueryBuilder[T] {
 	builder.distinct = true
 	return builder
 }
 
-func (builder *Builder[T]) From(table string, as ...string) contracts.Query[T] {
+func (builder *Builder[T]) From(table string, as ...string) contracts.QueryBuilder[T] {
 	if len(as) == 0 {
 		builder.table = table
 	} else {
@@ -139,17 +139,17 @@ func (builder *Builder[T]) From(table string, as ...string) contracts.Query[T] {
 	return builder
 }
 
-func (builder *Builder[T]) Offset(offset int64) contracts.Query[T] {
+func (builder *Builder[T]) Offset(offset int64) contracts.QueryBuilder[T] {
 	builder.offset = offset
 	return builder
 }
 
-func (builder *Builder[T]) Limit(num int64) contracts.Query[T] {
+func (builder *Builder[T]) Limit(num int64) contracts.QueryBuilder[T] {
 	builder.limit = num
 	return builder
 }
 
-func (builder *Builder[T]) WithPagination(perPage int64, current ...int64) contracts.Query[T] {
+func (builder *Builder[T]) WithPagination(perPage int64, current ...int64) contracts.QueryBuilder[T] {
 	builder.limit = perPage
 	if len(current) > 0 {
 		builder.offset = perPage * (current[0] - 1)
@@ -157,20 +157,20 @@ func (builder *Builder[T]) WithPagination(perPage int64, current ...int64) contr
 	return builder
 }
 
-func (builder *Builder[T]) FromMany(tables ...string) contracts.Query[T] {
+func (builder *Builder[T]) FromMany(tables ...string) contracts.QueryBuilder[T] {
 	if len(tables) > 0 {
 		builder.table = strings.Join(tables, ",")
 	}
 	return builder
 }
 
-func (builder *Builder[T]) FromSub(provider contracts.QueryProvider[T], as string) contracts.Query[T] {
+func (builder *Builder[T]) FromSub(provider contracts.QueryProvider[T], as string) contracts.QueryBuilder[T] {
 	subBuilder := provider()
 	builder.fromSub = &fromSub[T]{as: as, subQuery: subBuilder}
 	return builder.addBinding(fromBinding, subBuilder.GetBindings()...)
 }
 
-func (builder *Builder[T]) When(condition bool, callback contracts.QueryCallback[T], elseCallback ...contracts.QueryCallback[T]) contracts.Query[T] {
+func (builder *Builder[T]) When(condition bool, callback contracts.QueryCallback[T], elseCallback ...contracts.QueryCallback[T]) contracts.QueryBuilder[T] {
 	if condition {
 		return callback(builder)
 	} else if len(elseCallback) > 0 {

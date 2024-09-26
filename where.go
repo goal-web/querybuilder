@@ -84,7 +84,7 @@ func (wheres *Wheres) String() (result string) {
 	return
 }
 
-func (builder *Builder[T]) WhereFunc(callback contracts.QueryFunc[T], whereType ...contracts.WhereJoinType) contracts.Query[T] {
+func (builder *Builder[T]) WhereFunc(callback contracts.QueryFunc[T], whereType ...contracts.WhereJoinType) contracts.QueryBuilder[T] {
 	subBuilder := &Builder[T]{
 		wheres: &Wheres{
 			wheres:    map[contracts.WhereJoinType][]*Where{},
@@ -101,18 +101,18 @@ func (builder *Builder[T]) WhereFunc(callback contracts.QueryFunc[T], whereType 
 	return builder.addBinding(whereBinding, subBuilder.GetBindings()...)
 }
 
-func (builder *Builder[T]) WhereFields(fields contracts.Fields) contracts.Query[T] {
+func (builder *Builder[T]) WhereFields(fields contracts.Fields) contracts.QueryBuilder[T] {
 	for column, value := range fields {
 		builder.Where(column, value)
 	}
 	return builder
 }
 
-func (builder *Builder[T]) OrWhereFunc(callback contracts.QueryFunc[T]) contracts.Query[T] {
+func (builder *Builder[T]) OrWhereFunc(callback contracts.QueryFunc[T]) contracts.QueryBuilder[T] {
 	return builder.WhereFunc(callback, contracts.Or)
 }
 
-func (builder *Builder[T]) Where(field string, args ...any) contracts.Query[T] {
+func (builder *Builder[T]) Where(field string, args ...any) contracts.QueryBuilder[T] {
 	var (
 		arg       any
 		condition = "="
@@ -141,7 +141,7 @@ func (builder *Builder[T]) Where(field string, args ...any) contracts.Query[T] {
 	return builder.addBinding(whereBinding, bindings...)
 }
 
-func (builder *Builder[T]) OrWhere(field string, args ...any) contracts.Query[T] {
+func (builder *Builder[T]) OrWhere(field string, args ...any) contracts.QueryBuilder[T] {
 	var (
 		arg       any
 		condition = "="

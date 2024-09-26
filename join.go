@@ -42,7 +42,7 @@ func (joins Joins) String() (result string) {
 	return
 }
 
-func (builder *Builder[T]) Join(table string, first, condition, second string, joins ...contracts.JoinType) contracts.Query[T] {
+func (builder *Builder[T]) Join(table string, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder[T] {
 	join := contracts.InnerJoin
 	if len(joins) > 0 {
 		join = joins[0]
@@ -58,7 +58,7 @@ func (builder *Builder[T]) Join(table string, first, condition, second string, j
 	return builder
 }
 
-func (builder *Builder[T]) JoinSub(provider contracts.QueryProvider[T], as, first, condition, second string, joins ...contracts.JoinType) contracts.Query[T] {
+func (builder *Builder[T]) JoinSub(provider contracts.QueryProvider[T], as, first, condition, second string, joins ...contracts.JoinType) contracts.QueryBuilder[T] {
 	join := contracts.InnerJoin
 	if len(joins) > 0 {
 		join = joins[0]
@@ -75,17 +75,17 @@ func (builder *Builder[T]) JoinSub(provider contracts.QueryProvider[T], as, firs
 	return builder.addBinding(joinBinding, subBuilder.GetBindings()...)
 }
 
-func (builder *Builder[T]) FullJoin(table string, first, condition, second string) contracts.Query[T] {
+func (builder *Builder[T]) FullJoin(table string, first, condition, second string) contracts.QueryBuilder[T] {
 	return builder.Join(table, first, condition, second, contracts.FullJoin)
 }
-func (builder *Builder[T]) FullOutJoin(table string, first, condition, second string) contracts.Query[T] {
+func (builder *Builder[T]) FullOutJoin(table string, first, condition, second string) contracts.QueryBuilder[T] {
 	return builder.Join(table, first, condition, second, contracts.FullOutJoin)
 }
 
-func (builder *Builder[T]) LeftJoin(table string, first, condition, second string) contracts.Query[T] {
+func (builder *Builder[T]) LeftJoin(table string, first, condition, second string) contracts.QueryBuilder[T] {
 	return builder.Join(table, first, condition, second, contracts.LeftJoin)
 }
 
-func (builder *Builder[T]) RightJoin(table string, first, condition, second string) contracts.Query[T] {
+func (builder *Builder[T]) RightJoin(table string, first, condition, second string) contracts.QueryBuilder[T] {
 	return builder.Join(table, first, condition, second, contracts.RightJoin)
 }

@@ -38,7 +38,7 @@ func (orderByFields OrderByFields) String() string {
 	return strings.Join(columns, ",")
 }
 
-func (builder *Builder[T]) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.Query[T] {
+func (builder *Builder[T]) OrderBy(field string, columnOrderType ...contracts.OrderType) contracts.QueryBuilder[T] {
 	if len(columnOrderType) > 0 {
 		builder.orderBy = append(builder.orderBy, OrderBy{
 			field:          field,
@@ -54,7 +54,7 @@ func (builder *Builder[T]) OrderBy(field string, columnOrderType ...contracts.Or
 	return builder
 }
 
-func (builder *Builder[T]) OrderByDesc(field string) contracts.Query[T] {
+func (builder *Builder[T]) OrderByDesc(field string) contracts.QueryBuilder[T] {
 	builder.orderBy = append(builder.orderBy, OrderBy{
 		field:          field,
 		fieldOrderType: contracts.Desc,
@@ -62,7 +62,7 @@ func (builder *Builder[T]) OrderByDesc(field string) contracts.Query[T] {
 	return builder
 }
 
-func (builder *Builder[T]) InRandomOrder(orderFunc ...contracts.OrderType) contracts.Query[T] {
+func (builder *Builder[T]) InRandomOrder(orderFunc ...contracts.OrderType) contracts.QueryBuilder[T] {
 	fn := RandomOrder
 	if len(orderFunc) > 0 {
 		fn = orderFunc[0]
