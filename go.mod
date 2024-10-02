@@ -1,6 +1,6 @@
 module github.com/goal-web/querybuilder
 
-go 1.20
+go 1.23.1
 
 require (
 	github.com/stretchr/testify v1.7.0
