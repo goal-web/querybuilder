@@ -5,6 +5,15 @@ import (
 	"github.com/goal-web/contracts"
 )
 
+func (builder *Builder[T]) With(relations ...contracts.RelationType) contracts.QueryBuilder[T] {
+	builder.Withs = relations
+	return builder
+}
+
+func (builder *Builder[T]) GetWith() []contracts.RelationType {
+	return builder.Withs
+}
+
 func (builder *Builder[T]) Select(fields ...string) contracts.QueryBuilder[T] {
 	builder.Selects = fields
 	return builder

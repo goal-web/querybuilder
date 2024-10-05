@@ -24,6 +24,8 @@ type Builder[T any] struct {
 	unions   Unions[T]
 	having   *Wheres
 	bindings map[bindingType][]any
+
+	Withs []contracts.RelationType
 }
 
 func (builder *Builder[T]) Bind(executor contracts.QueryExecutor[T]) contracts.QueryBuilder[T] {
