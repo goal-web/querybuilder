@@ -3,19 +3,24 @@ package querybuilder
 import (
 	"fmt"
 	"github.com/goal-web/contracts"
+	"github.com/goal-web/supports/utils"
 )
 
 type Where struct {
 	field     string
 	condition string
 	arg       string
+	raw       string
 }
 
-func (this *Where) String() string {
-	if this == nil {
+func (wheres *Where) String() string {
+	if wheres == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s %s %s", this.field, this.condition, this.arg)
+	if wheres.raw != "" {
+		return wheres.raw
+	}
+	return fmt.Sprintf("%s %s %s", wheres.field, wheres.condition, wheres.arg)
 }
 
 type Wheres struct {
@@ -139,6 +144,22 @@ func (builder *Builder[T]) Where(field string, args ...any) contracts.QueryBuild
 	})
 
 	return builder.addBinding(whereBinding, bindings...)
+}
+
+func (builder *Builder[T]) WhereRaw(raw string, whereTypes ...contracts.WhereJoinType) contracts.QueryBuilder[T] {
+	var (
+		whereType = utils.DefaultValue(whereTypes, contracts.And)
+	)
+
+	builder.wheres.wheres[whereType] = append(builder.wheres.wheres[whereType], &Where{
+		raw: raw,
+	})
+
+	return builder
+}
+
+func (builder *Builder[T]) OrWhereRaw(raw string) contracts.QueryBuilder[T] {
+	return builder.WhereRaw(raw, contracts.Or)
 }
 
 func (builder *Builder[T]) OrWhere(field string, args ...any) contracts.QueryBuilder[T] {

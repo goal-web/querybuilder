@@ -52,6 +52,10 @@ const (
 	unionBinding   bindingType = "union"
 )
 
+func (builder *Builder[T]) GetTableName() string {
+	return builder.table
+}
+
 func (builder *Builder[T]) getWheres() *Wheres {
 	return builder.wheres
 }
