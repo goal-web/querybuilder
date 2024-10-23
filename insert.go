@@ -39,7 +39,7 @@ func (builder *Builder[T]) CreateSql(value contracts.Fields, insertType2 ...cont
 	valuesString := fmt.Sprintf("(%s)", strings.Join(utils.MakeSymbolArray("?", len(value)), ","))
 	for name, field := range value {
 		bindings = append(bindings, wrapperValue(field))
-		keys = append(keys, name)
+		keys = append(keys, fmt.Sprintf("`%s`", name))
 	}
 
 	sql = fmt.Sprintf("%s into `%s` %s values %s", getInsertType(insertType2...), builder.table, fmt.Sprintf("(%s)", strings.Join(keys, ",")), valuesString)
@@ -59,8 +59,12 @@ func (builder *Builder[T]) InsertSql(values []contracts.Fields, insertType2 ...c
 			bindings = append(bindings, wrapperValue(value[field]))
 		}
 	}
+	var finalFields = make([]string, len(fields))
+	for i, field := range fields {
+		finalFields[i] = fmt.Sprintf("`%s`", field)
+	}
 
-	fieldsString := fmt.Sprintf(" (%s)", strings.Join(fields, ","))
+	fieldsString := fmt.Sprintf(" (%s)", strings.Join(finalFields, ","))
 
 	sql = fmt.Sprintf("%s into `%s`%s values %s", getInsertType(insertType2...), builder.table, fieldsString, strings.Join(valuesString, ","))
 	return
