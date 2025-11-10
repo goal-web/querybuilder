@@ -6,7 +6,7 @@ import (
 
 type ParamException struct {
 	Err       error
-	Arg       interface{}
+	Arg       any
 	Condition string
 	previous  contracts.Exception
 }
