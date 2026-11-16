@@ -1,0 +1,23 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.vs/
+.c9/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+.tmp/
+.temp/
