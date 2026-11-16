@@ -5,23 +5,33 @@ import (
 	"github.com/goal-web/contracts"
 )
 
-func (builder *Builder) Select(fields ...string) contracts.QueryBuilder {
-	builder.fields = fields
+func (builder *Builder[T]) With(relations ...contracts.RelationType) contracts.QueryBuilder[T] {
+	builder.Withs = relations
 	return builder
 }
 
-func (builder *Builder) AddSelect(fields ...string) contracts.QueryBuilder {
-	builder.fields = append(builder.fields, fields...)
+func (builder *Builder[T]) GetWith() []contracts.RelationType {
+	return builder.Withs
+}
+
+func (builder *Builder[T]) Select(fields ...string) contracts.QueryBuilder[T] {
+	builder.Selects = fields
 	return builder
 }
 
-func (builder *Builder) SelectSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
+func (builder *Builder[T]) AddSelect(fields ...string) contracts.QueryBuilder[T] {
+	builder.Selects = append(builder.Selects, fields...)
+	return builder
+}
+
+func (builder *Builder[T]) SelectSub(provider contracts.QueryProvider[T], as string) contracts.QueryBuilder[T] {
 	subBuilder := provider()
-	builder.fields = []string{fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)}
+	builder.Selects = []string{fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as)}
 	return builder.addBinding(selectBinding, subBuilder.GetBindings()...)
 }
-func (builder *Builder) AddSelectSub(provider contracts.QueryProvider, as string) contracts.QueryBuilder {
+
+func (builder *Builder[T]) AddSelectSub(provider contracts.QueryProvider[T], as string) contracts.QueryBuilder[T] {
 	subBuilder := provider()
-	builder.fields = append(builder.fields, fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as))
+	builder.Selects = append(builder.Selects, fmt.Sprintf("(%s) as %s", subBuilder.ToSql(), as))
 	return builder.addBinding(selectBinding, subBuilder.GetBindings()...)
 }
